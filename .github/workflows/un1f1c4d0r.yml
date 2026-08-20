@@ -20,27 +20,27 @@ jobs:
 
       - name: 🚀 Descarga Satelital y Re-Renderizado Líquido de Películas (ADN Unificado CRF)
         run: |
-          # 🪓 [REACTOR DE RELEVOS v4.5 - CRF ELASTIC S_YNCHRO CORE]
+          # 🪓 [REACTOR DE RELEVOS v4.6 - CRF UNIQUE TIMESTAMP CORE]
           export TERM=xterm
+          
+          # Fabricamos una marca de tiempo única rígida para que GitHub jamás confunda el archivo
+          FECHA_BOXES=$(date +'%d_%m_%H_%M')
+          echo "CODENAME_MARATON=maraton_${FECHA_BOXES}" >> $GITHUB_ENV
           
           echo "📡 [MUTINY TV] EMPEZANDO PROCESO DE UNIFICACIÓN CRIPTOGRÁFICA..."
           
-          # 1. Chupamos tu playlist unificada del Gist privado
           curl -s "https://gist.githubusercontent.com/jav45dev-ctrl/36a0241efb9e52e647e15a969eaa8459/raw/prueba_uni.txt" | tr -d '\r' | sed '/^$/d' > lista_gist.txt
           
           contador=1
           CADENA_FILTER=""
           
-          # 2. Descarga a velocidad satelital en la memoria virtual
           while read -r linea || [ -n "$linea" ]; do
             URL_VIDEO=$(echo "$linea" | awk -F'|' '{print $1}' | tr -d ' ')
-            
             if [ -n "$URL_VIDEO" ]; then
               echo "📥 Descargando e inyectando Tramo $contador: $URL_VIDEO"
               curl -L -H "Authorization: token ${{ secrets.TOKEN_B }}" \
                    -H "User-Agent: VLC/3.0.18 LibVLC/3.0.18" \
                    -o "origen_${contador}.video" "$URL_VIDEO"
-              
               CADENA_FILTER="${CADENA_FILTER} -i origen_${contador}.video"
               contador=$((contador + 1))
             fi
@@ -49,7 +49,6 @@ jobs:
           TOTAL_VIDEOS=$((contador - 1))
           echo "🍿 Total de cartuchos en fila india detectados: $TOTAL_VIDEOS"
 
-          # Fabricamos el mapa de mezcla molecular para FFmpeg unificando el SAR y el lienzo a 720p
           FILTRO_CONCAT=""
           for i in $(seq 0 $((TOTAL_VIDEOS - 1))); do
             FILTRO_CONCAT="${FILTRO_CONCAT}[${i}:v]scale=1280:720:force_original_aspect_ratio=decrease,pad=1280:720:(ow-iw)/2:(oh-ih)/2,setsar=1:1,setpts=PTS-STARTPTS[v${i}]; [${i}:a:0]aresample=async=1,asetpts=PTS-STARTPTS[a${i}]; "
@@ -61,30 +60,28 @@ jobs:
           done
           FILTRO_CONCAT="${FILTRO_CONCAT}${FUSION_FINAL}concat=n=${TOTAL_VIDEOS}:v=1:a=1[v_out][a_out]"
 
-          echo "🪓 [MUTINY] LICUANDO EL ADN CON COMPRESIÓN ELÁSTICA CRF MULTI-KEYFRAME..."
+          echo "🪓 [MUTINY] LICUANDO EL ADN CON COMPRESIÓN CRF ELÁSTICA..."
           
-          # 3. LA CRÍA BIÓNICA INTELIGENTE:
-          # Clavamos -crf 23 y forzamos la inserción de keyframes rígidos cada 60 cuadros (-g 60)
-          # Esto pulveriza la lona en negro de VLC, te deja el pasamano continuo y te mantiene el peso pluma real.
+          # Le clavamos el nombre dinámico exclusivo de esta carrera
           ffmpeg -y ${CADENA_FILTER} -filter_complex "${FILTRO_CONCAT}" \
           -map "[v_out]" -map "[a_out]" -r 30 -pix_fmt yuv420p \
           -c:v libx264 -preset ultrafast -crf 23 -g 60 -keyint_min 60 \
-          -c:a aac -b:a 128k -ac 2 -ar 44100 maraton_perfecta.mp4
+          -c:a aac -b:a 128k -ac 2 -ar 44100 "maraton_${FECHA_BOXES}.mp4"
 
-          echo "✅ Súper-video soldado y estabilizado a nivel molecular."
-          ls -lh maraton_perfecta.mp4
+          echo "✅ Súper-video soldado y estabilizado sin sobrepeso."
+          ls -lh "maraton_${FECHA_BOXES}.mp4"
 
-      # Guardamos el archivo liviano adentro de tu cofre limpio maraton_soberana
+      # Guardamos el archivo con su tag único exclusivo inmune a bloqueos de caché
       - name: 📦 Guardando Cartucho en las Releases del Repositorio (Auditoría Libre)
         uses: softprops/action-gh-release@v2
         with:
-          files: maraton_perfecta.mp4
-          tag_name: maraton_soberana
-          name: "🍿 Mutiny TV - Maratones Continuas Masterizadas"
-          body: "Esta maratón se masterizó por re-encode elástico CRF-23. ADN unificado en 720p 30FPS con inyección de keyframes. Inmune a baches de red, pantallas negras y saltos en VLC."
+          files: "${{ env.CODENAME_MARATON }}.mp4"
+          tag_name: "${{ env.CODENAME_MARATON }}"
+          name: "🍿 Mutiny TV - Cartucho Masterizado ${{ env.CODENAME_MARATON }}"
+          body: "Esta maratón se masterizó por re-encode elástico CRF-23 bajo una clave de chapa única. Inmune a baches de red, pantallas negras y bloqueos de caché de la API."
           draft: false
           prerelease: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-       
+    
