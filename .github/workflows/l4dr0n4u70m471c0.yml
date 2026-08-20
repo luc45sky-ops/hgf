@@ -1,4 +1,4 @@
-name: 📡 Mutiny TV - Automático v6.0
+name: 📡 Mutiny TV - Ladrón de Contenido Síncrono Automático v6.2
 
 on:
   workflow_dispatch: # Se prende con un único botón de PLAY manual en la web de GitHub
@@ -20,7 +20,7 @@ jobs:
 
       - name: 🚀 Extracción en Cadena e Inmune a Bloqueos de Tamaño por Purga Local
         run: |
-          # 🪓 [REACTOR CENTRAL INDUSTRIAL v6.0 - AUTOMATIC GIST & PURGE CORE]
+          # 🪓 [REACTOR CENTRAL INDUSTRIAL v6.2 - DIEGO BLINDED STDIN & PURGE CORE]
           export TERM=xterm
           
           echo "📡 [MUTINY TV] SUCCIONANDO ÓRDENES DE TRABAJO DESDE EL GIST..."
@@ -30,53 +30,52 @@ jobs:
           
           contador=1
           
-          # 2. El bucle infinito de relevos: camina la lista renglón por renglón
-          while read -r linea || [ -n "$linea" ]; do
-            # Disección molecular: separamos el link y el nombre final usando la tubería '|'
+          # 2. EL REMACHE MAESTRO DE AJEDREZ: Usamos el descriptor de archivos 3 (<&3)
+          # Esto blinda el bucle while para que ffmpeg jamás pueda robarse los renglones de la lista en la RAM.
+          while read -r linea <&3 || [ -n "$linea" ]; do
             URL_PIRATA=$(echo "$linea" | awk -F'|' '{print $1}' | tr -d ' ')
             NOMBRE_FINAL=$(echo "$linea" | awk -F'|' '{print $2}' | tr -d ' ')
             
             if [ -n "$URL_PIRATA" ] && [ -n "$NOMBRE_FINAL" ]; then
               echo "------------------------------------------------------------"
               echo "🍿 [PROCESANDO TRABAJO N° $contador]: $NOMBRE_FINAL"
-              echo "🔗 Link Origen: $URL_PIRATA"
+              echo "🔗 Link Original Seguro: $URL_PIRATA"
               echo "------------------------------------------------------------"
               
               echo "📥 FASE 1: Succionando los bytes crudos con curl..."
-              # Chupa el fideo saltando aduanas HTTP de Star Latino y paneles rotos
-              curl -L -A "VLC/3.0.18 LibVLC/3.0.18" -o descarga_cruda.tmp "$URL_PIRATA"
+              curl -L -A "VLC/3.0.18 LibVLC/3.0.18" -o descarga_cruda.tmp "$URL_PIRATA" || true
               
-              # 🛠️ BYPASS DE ERRORES: Si el archivo quedó en 0 bytes porque el link caducó, salta al siguiente
+              # BYPASS DE ERRORES BIÓNICO: Si el fideo quedó vacío por caída de red, pasa de largo
               if [ ! -s "descarga_cruda.tmp" ]; then
-                echo "⚠️ [ALERTA DE BOXES] El enlace del Renglón $contador está roto o caducó. Saltando de largo al siguiente..."
+                echo "⚠️ [ALERTA DE BOXES] El enlace del Renglón $contador falló la descarga. Saltando al siguiente..."
                 rm -f descarga_cruda.tmp
                 contador=$((contador + 1))
                 continue
               fi
               
               echo "📥 FASE 2: Aplicando el Molde de Titanio (ADN Mutiny 720p CRF-22)..."
-              # Aplica el molde rígido unificado, normaliza el SAR a 1:1 e inyecta los Keyframes fijos
-              ffmpeg -y -i descarga_cruda.tmp \
+              # [REPARADO DEFINITIVO v6.2]: Calzamos el flag -nostdin rígido al arranque.
+              # Esto le rompe las manos a ffmpeg para que no toque la lista de relevos en background.
+              ffmpeg -y -nostdin -i descarga_cruda.tmp \
                 -filter_complex "[0:v]scale=1280:720:force_original_aspect_ratio=decrease,pad=1280:720:(ow-iw)/2:(oh-ih)/2,setsar=1:1[v_moldeado]" \
                 -map "[v_moldeado]" -map 0:a:0? -r 30 -pix_fmt yuv420p \
                 -c:v libx264 -preset ultrafast -crf 22 -g 60 -keyint_min 60 \
-                -c:a aac -b:a 128k -ac 2 -ar 44100 -async 1 "$NOMBRE_FINAL"
+                -c:a aac -b:a 128k -ac 2 -ar 44100 -async 1 "$NOMBRE_FINAL" || { echo "⚠️ Falló el render. Saltando..."; rm -f descarga_cruda.tmp "$NOMBRE_FINAL"; contador=$((contador + 1)); continue; }
                 
               echo "💾 FASE 3: Inyectando el video masterizado en el cofre bunker_mutiny..."
-              # Subimos la película limpia usando la herramienta nativa de GitHub Actions
-              # Al pesar strictly entre 400 y 800 MB gracias al CRF-22, pasa la aduana muerto de risa
-              gh release upload bunker_mutiny "$NOMBRE_FINAL" --clobber
+              gh release upload bunker_mutiny "$NOMBRE_FINAL" --clobber || echo "⚠️ Falló la subida de chapa."
               
               echo "🪓 FASE 4: EL SEGURO DE TITANIO - PURGA TOTAL DEL DISCO VIRTUAL..."
-              # 🧠 [EL REMACHE MAESTRO]: Demolemos los dos archivos pesados del disco de Microsoft.
-              # El espacio de la máquina virtual vuelve a 0 MB limpios antes de leer la próxima línea.
+              # Limpieza quirúrgica de los temporales. El disco vuelve a 0 MB ocupados antes del próximo renglón.
               rm -f descarga_cruda.tmp "$NOMBRE_FINAL"
               
               echo "✅ TRABAJO N° $contador COMPLETADO CON ÉXITO ABSOLUTO."
               contador=$((contador + 1))
             fi
-          done < ordenes_bunker.txt
+          done 3< ordenes_bunker.txt # Canal de lectura blindado rígido de boxes
           
           echo "🏁 [MUTINY TV] Toda la cartelera del Gist fue clonada y purificada. Estante lleno."
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+        
