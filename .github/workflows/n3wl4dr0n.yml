@@ -23,37 +23,40 @@ jobs:
       - name: 🗄️ Inicializando espacio en el disco virtual de Microsoft
         uses: actions/checkout@v4
 
-      # Setup FFmpeg ultra-rápido en 4 segundos sordos para volar desde el arranque
+      # Setup FFmpeg ultra-rápido en 4 segundos sordos
       - name: ⚙️ Setup FFmpeg Nativo en la Nube
         uses: federicocarboni/setup-ffmpeg@v3
 
       - name: 🚀 Clonación Satelital y Normalización de ADN Multimedia a la RAM
         run: |
-          # 🪓 [REACTOR CENTRAL INDUSTRIAL v5.0 - DIEGO NORMALIZER CORE]
+          # 🪓 [REACTOR CENTRAL INDUSTRIAL v5.1 - DIEGO TWO-STAGE CORE]
           export TERM=xterm
           
-          echo "📥 Descargando fideo digital y moldeando parámetros a chapa rígida..."
+          echo "📥 FASE 1: Clonando el video intacto al disco local con tu motor inmune..."
           
-          # 🪓 LA COSTURA MAESTRA:
-          # 1. Volamos el -c:v copy parásito.
-          # 2. Inyectamos filter_complex para clavar molde rígido 1280x720 con SAR 1:1 y barras estabilizadoras.
-          # 3. Forzamos -crf 22 para máxima calidad peso pluma y -g 60 para inyección síncrona de Keyframes.
+          # Mantenemos estrictamente tu comando original intacto con -c:v copy para que no crashee la red
           ffmpeg -y -headers "User-Agent: VLC/3.0.18 LibVLC/3.0.18" \
             -reconnect 1 -reconnect_at_eof 1 -reconnect_streamed 1 -reconnect_delay_max 5 \
-            -i "${{ github.event.inputs.url_pirata }}" \
-            -filter_complex "[0:v]scale=1280:720:force_original_aspect_ratio=decrease,pad=1280:720:(ow-iw)/2:(oh-ih)/2,setsar=1:1[v_moldeado]" \
-            -map "[v_moldeado]" -map 0:a:0? -r 30 -pix_fmt yuv420p \
-            -c:v libx264 -preset ultrafast -crf 22 -g 60 -keyint_min 60 \
-            -c:a aac -b:a 128k -ac 2 -ar 44100 -async 1 \
-            -bsf:a aac_adtstoasc "${{ github.event.inputs.nombre_pelicula }}" || true
+            -i "${{ github.event.inputs.url_pirata }}" -c:v copy -c:a aac -ac 2 -ar 44100 -async 1 \
+            -bsf:a aac_adtstoasc descarga_cruda.mp4 || true
 
-          # Verificación de chapa anti-bancarrota
-          if [ ! -s "${{ github.event.inputs.nombre_pelicula }}" ]; then
+          # Verificación de chapa anti-bancarrota de la descarga
+          if [ ! -s "descarga_cruda.mp4" ]; then
              echo "❌ El caño de red se congeló o el link caducó en internet. Abortando."
              exit 1
           fi
           
-          echo "✅ Película estandarizada al 100% con ADN Mutiny. Peso total real:"
+          echo "📥 FASE 2: Aplicando el Molde de Titanio al archivo local en frío absolute..."
+          
+          # Como el archivo ya está en el disco, procesamos el filtro complejo con CRF-22 sin baches de red
+          # Esto pulveriza el Segmentation Fault, normaliza el SAR a 1:1 e inyecta los Keyframes fijos (-g 60)
+          ffmpeg -y -i descarga_cruda.mp4 \
+            -filter_complex "[0:v]scale=1280:720:force_original_aspect_ratio=decrease,pad=1280:720:(ow-iw)/2:(oh-ih)/2,setsar=1:1[v_moldeado]" \
+            -map "[v_moldeado]" -map 0:a:0? -r 30 -pix_fmt yuv420p \
+            -c:v libx264 -preset ultrafast -crf 22 -g 60 -keyint_min 60 \
+            -c:a copy "${{ github.event.inputs.nombre_pelicula }}"
+
+          echo "✅ Película estandarizada y blindada al 100% de ADN Mutiny. Peso total real:"
           du -sh "${{ github.event.inputs.nombre_pelicula }}"
 
       - name: 💾 Inyectando el Video Intacto en las Releases Locales de esta Cuenta
