@@ -29,32 +29,33 @@ jobs:
 
       - name: 🚀 Clonación Satelital y Normalización de ADN Multimedia a la RAM
         run: |
-          # 🪓 [REACTOR CENTRAL INDUSTRIAL v5.1 - DIEGO TWO-STAGE CORE]
+          # 🪓 [REACTOR CENTRAL INDUSTRIAL v5.2 - DIEGO CURL BYPASS CORE]
           export TERM=xterm
           
-          echo "📥 FASE 1: Clonando el video intacto al disco local con tu motor inmune..."
+          echo "📥 FASE 1: Succionando los bytes crudos de internet con el extractor inmune..."
           
-          # Mantenemos estrictamente tu comando original intacto con -c:v copy para que no crashee la red
-          ffmpeg -y -headers "User-Agent: VLC/3.0.18 LibVLC/3.0.18" \
-            -reconnect 1 -reconnect_at_eof 1 -reconnect_streamed 1 -reconnect_delay_max 5 \
-            -i "${{ github.event.inputs.url_pirata }}" -c:v copy -c:a aac -ac 2 -ar 44100 -async 1 \
-            -bsf:a aac_adtstoasc descarga_cruda.mp4 || true
+          # [REPARADO DEFINITIVO v5.2]: Volamos a ffmpeg de la descarga de red para aplastar el SegFault.
+          # Usamos curl -L con tu cabecera VLC para chupar el archivo directo al disco como un bloque de titanio.
+          curl -L -A "VLC/3.0.18 LibVLC/3.0.18" -o descarga_cruda.mp4 "${{ github.event.inputs.url_pirata }}"
 
           # Verificación de chapa anti-bancarrota de la descarga
           if [ ! -s "descarga_cruda.mp4" ]; then
-             echo "❌ El caño de red se congeló o el link caducó en internet. Abortando."
+             echo "❌ El extractor de red se congeló o el link caducó en internet. Abortando."
              exit 1
           fi
           
+          echo "✅ Descarga completada con éxito. Tamaño del archivo crudo:"
+          du -sh descarga_cruda.mp4
+          
           echo "📥 FASE 2: Aplicando el Molde de Titanio al archivo local en frío absolute..."
           
-          # Como el archivo ya está en el disco, procesamos el filtro complejo con CRF-22 sin baches de red
-          # Esto pulveriza el Segmentation Fault, normaliza el SAR a 1:1 e inyecta los Keyframes fijos (-g 60)
+          # Como el archivo ya es local, el procesador muerde el video sin baches de red,
+          # le aplica el filtro complejo de 1280x720, normaliza el SAR a 1:1 e inyecta los Keyframes fijos (-g 60)
           ffmpeg -y -i descarga_cruda.mp4 \
             -filter_complex "[0:v]scale=1280:720:force_original_aspect_ratio=decrease,pad=1280:720:(ow-iw)/2:(oh-ih)/2,setsar=1:1[v_moldeado]" \
             -map "[v_moldeado]" -map 0:a:0? -r 30 -pix_fmt yuv420p \
             -c:v libx264 -preset ultrafast -crf 22 -g 60 -keyint_min 60 \
-            -c:a copy "${{ github.event.inputs.nombre_pelicula }}"
+            -c:a aac -b:a 128k -ac 2 -ar 44100 -async 1 "${{ github.event.inputs.nombre_pelicula }}"
 
           echo "✅ Película estandarizada y blindada al 100% de ADN Mutiny. Peso total real:"
           du -sh "${{ github.event.inputs.nombre_pelicula }}"
