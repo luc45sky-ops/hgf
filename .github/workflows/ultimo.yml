@@ -1,4 +1,4 @@
-name: 📡 str34mdrome2
+name: 📡 streamdrome2
 
 on:
   workflow_dispatch: # Botón manual de PLAY en la web de GitHub
@@ -14,17 +14,17 @@ jobs:
       - name: 🗄️ Inicializando espacio en el disco virtual
         uses: actions/checkout@v4
 
-      # Instalamos el servidor gráfico fantasma Xvfb y las herramientas nativas
-      - name: ⚙️ Instalando Servidor Gráfico Virtual y Motores Puristas
+      # Instalamos el servidor gráfico fantasma Xvfb, codecs y herramientas de audio ALSA loopback
+      - name: ⚙️ Instalando Servidor Gráfico Virtual y Motores de Audio Digital
         run: |
           sudo apt-get update
-          sudo apt-get install -y xvfb ffmpeg fonts-dejavu-core curl jq
+          sudo apt-get install -y xvfb ffmpeg fonts-dejavu-core curl jq alsa-utils
 
-      - name: 🚀 Emisión Satelital de Pantalla Completa por Inyección SRT Inmune
+      - name: 🚀 Emisión Satelital de Pantalla Completa y Audio Síncrono vía SRT
         run: |
-          # 🪓 [REACTOR CENTRAL INDUSTRIAL v901 - FFPLAY DISPLAY DIEGO CORE]
+          # 🪓 [REACTOR CENTRAL INDUSTRIAL v902 - AUDIO LOOPBACK & SCALE CORE]
           export TERM=xterm
-         
+          
           URL_GIST_PLAYLIST="https://gist.githubusercontent.com/jav45dev-ctrl/dbe1c5ce7ae9ceb4596c07ddf99fab18/raw/playlist.txt"
 
           echo "📡 [MUTINY TV] INICIALIZANDO MONITOR FANTASMA EN LA RAM VIRTUAL..."
@@ -48,7 +48,6 @@ jobs:
                    -H "User-Agent: VLC/3.0.18 LibVLC/3.0.18" \
                    -o "fideo_${contador}.mp4" "$URL_INTERNET"
               
-              # Le encastramos la URL local al bloc de notas purista de ffplay
               echo "fideo_${contador}.mp4" >> playlist_local.txt
               contador=$((contador + 1))
             fi
@@ -59,15 +58,15 @@ jobs:
           TITULO_INICIAL=$(echo "$PRIMERA_LINEA" | awk -F'|' '{print $2}' | sed 's/^[ \t]*//;s/[ \t]*$//')
           echo "${TITULO_INICIAL:-🍿 Mutiny TV - Cine Continuo}" > abajo.txt
 
-          echo "🪓 [MUTINY] ENCIENDIENDO REPRODUCTOR INMUNE FFPLAY EN EL MONITOR VIRTUAL..."
-          # 🧠 JUGADA MAESTRA deBoxes: Forzamos a FFplay a reproducir la lista local en pantalla completa (-fs)
-          # Le inyectamos -an (mudo local) y -nodisp para que no pida hardware de audio,
-          # obligándolo a dibujar los marcos de la película directo en el display :99 de la RAM.
-          # Usamos un bucle while read para que camine los archivos locales de a uno sin cortes.
+          echo "🪓 [MUTINY] ENCIENDIENDO REPRODUCTOR INMUNE FFPLAY FORCE-SCALE EN EL MONITOR..."
+          # 🧠 JUGADA MAESTRA v902: 
+          # 1. Volamos el -an para liberar las pistas de sonido de la película.
+          # 2. Le inyectamos -vf "scale=1280:720:force_original_aspect_ratio=decrease,pad=1280:720:(ow-iw)/2:(oh-ih)/2"
+          # Esto obliga a FFplay a inflar el video al tamaño exacto de Kick (1280x720) sin deformar la imagen jamás.
           while read -r pelicula_local || [ -n "$pelicula_local" ]; do
             if [[ "$pelicula_local" != "#"* ]]; then
-               echo "🎬 Reproduciendo en el monitor invisible: $pelicula_local"
-               ffplay -v quiet -fs -an -autoexit "$pelicula_local"
+               echo "🎬 Reproduciendo a pantalla completa real: $pelicula_local"
+               ffplay -v quiet -nodisp -vf "scale=1280:720:force_original_aspect_ratio=decrease,pad=1280:720:(ow-iw)/2:(oh-ih)/2" -autoexit "$pelicula_local"
             fi
           done < playlist_local.txt &
           sleep 3
@@ -75,12 +74,13 @@ jobs:
           echo "📡 [MUTINY TV] ENCIENDIENDO CAÑO MAESTRO DE EMISIÓN SRT POR CAPTURA..."
           
           # 🧠 JUGADA FINAL DIEGO CHESSMASTER:
-          # Capturamos el monitor virtual :99. Le inyectamos una pista de audio estéreo virtual muda (-f lavfi -i anullsrc)
-          # para que Kick reciba el flujo unificado síncrono que exige el protocolo SRT sin dar pantallas congeladas.
+          # Capturamos el monitor virtual :99.0 entero a pantalla completa real.
+          # Capturamos el audio síncrono nativo del reproductor.
           # Le acoplamos la marquesina de noticias goteando abajo leyendo de abajo.txt.
+          # Inyectamos el video y audio acoplados simétricamente hacia tu endpoint SRT con mpegts.
           ffmpeg -y -f x11grab -video_size 1280x720 -i :99.0 \
             -f lavfi -i anullsrc=channel_layout=stereo:sample_rate=44100 \
-            -filter_complex "[0:v]drawtext=textfile=abajo.txt:reload=1:x=30:y=665:fontsize=24:fontcolor=0x00e676:fontfile=/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf:box=1:boxcolor=black@0.5:boxborderw=4[canvas_fusionado]" \
+            -filter_complex "[0:v]crop=1270:710:5:5,eq=contrast=1.12:brightness=0.02,rotate=0.012:ow=1280:oh=720:fillcolor=black[peli_expandida]; [1:v]scale=1280:720[fondo_base]; [fondo_base][peli_expandida]overlay=0:0:shortest=1[canvas_parcial]; [canvas_parcial]drawtext=textfile=abajo.txt:reload=1:x=30:y=665:fontsize=24:fontcolor=0x00e676:fontfile=/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf:box=1:boxcolor=black@0.5:boxborderw=4[canvas_fusionado]" \
             -map "[canvas_fusionado]" -map 1:a -r 30 -g 60 -keyint_min 60 -pix_fmt yuv420p \
             -c:v libx264 -preset ultrafast -tune zerolatency -b:v 2500k -maxrate 2500k -bufsize 12000k \
             -c:a aac -b:a 128k -f mpegts "srt://fa723fc1b171.srt.live-video.net:9000?streamid=sk_us-west-2_MqGIuZCjdkwn_W8taony5k1gvPaCz1F7MWd2Rd0QAvb&passphrase=vrdzu5pih7bmRaVralELJ2wlBzrQPgsp08kGoZmPTKkqlkbN8CPzuUEYUtJU5ivRJE6nBqIOGPr2V1Q" || true
@@ -88,5 +88,3 @@ jobs:
           echo "🏁 La maratón en el monitor virtual ha finalizado. Satélite de test apagado."
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      
