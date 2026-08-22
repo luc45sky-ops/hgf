@@ -1,0 +1,87 @@
+name: 📡 ultimo str - Headless Display Core
+
+on:
+  workflow_dispatch: # Botón manual de PLAY en la web de GitHub
+
+permissions:
+  contents: write
+  actions: write
+
+jobs:
+  streaming:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 🗄️ Clonando el búnker de archivos estáticos
+        uses: actions/checkout@v4
+
+      # Instalamos el servidor gráfico fantasma Xvfb y las herramientas de renderizado
+      - name: ⚙️ Instalando Servidor Gráfico Virtual y Codecs Nativos
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y xvfb vlc ffmpeg fonts-dejavu-core curl jq
+
+      - name: 🚀 Emisión Satelital por Captura de Monitor Invisible Inmune a Cortes
+        run: |
+          # 🪓 [REACTOR CENTRAL INDUSTRIAL v900 - HEADLESS DISPLAY DIEGO CORE]
+          export TERM=xterm
+          
+          echo "Cargando marquesina soberana..." > abajo.txt
+          
+          URL_GIST_NOTICIAS="https://gist.githubusercontent.com/jav45dev-ctrl/dbe1c5ce7ae9ceb4596c07ddf99fab18/raw/noticias.txt"
+          URL_GIST_PLAYLIST="https://gist.githubusercontent.com/jav45dev-ctrl/dbe1c5ce7ae9ceb4596c07ddf99fab18/raw/playlist.txt"
+
+          # 🧠 HILO INMUNE DE NOTICIAS: Sigue corriendo en background modificando el bloc abajo.txt
+          # Al transmitirse por captura de pantalla, este bucle ya no puede tumbar el vivo de FFmpeg.
+          while true; do curl -s "$URL_GIST_NOTICIAS" | head -n 1 | tr -d '\r\n' > abajo.txt; sleep 5; done &
+
+          echo "📡 [MUTINY TV] INICIALIZANDO MONITOR FANTASMA EN LA RAM VIRTUAL..."
+          # 🧠 JUGADA 1: Creamos la pantalla invisible de 1280x720 a 24 bits de color en el display :99
+          Xvfb :99 -screen 0 1280x720x24 &
+          export DISPLAY=:99
+          sleep 2
+
+          echo "📡 [MUTINY TV] SUCCIONANDO PLAYLIST REMOTA DESDE EL GIST..."
+          # Nos bajamos tu playlist unificada (La de toda la vida: URL | TITULO)
+          curl -L -s "$URL_GIST_PLAYLIST" | tr -d '\r' | sed '/^$/d' > grilla_remota.txt
+
+          # 🧱 Fabricamos la lista nativa de archivos locales para que VLC no sufra tirones de red
+          echo "# Lista local" > playlist_local.txt
+          contador=1
+          
+          while read -r linea || [ -n "$linea" ]; do
+            URL_INTERNET=$(echo "$linea" | awk -F'|' '{print $1}' | tr -d ' ')
+            if [ -n "$URL_INTERNET" ]; then
+              echo "📥 Pre-descargando Tramo $contador al disco rígido virtual: $URL_INTERNET"
+              curl -L -H "Authorization: token ${{ secrets.TOKEN_B }}" \
+                   -H "User-Agent: VLC/3.0.18 LibVLC/3.0.18" \
+                   -o "fideo_${contador}.mp4" "$URL_INTERNET"
+              
+              echo "fideo_${contador}.mp4" >> playlist_local.txt
+              contador=$((contador + 1))
+            fi
+          done < grilla_remota.txt
+
+          echo "🪓 [MUTINY] LANZANDO REPRODUCTOR MULTIMEDIA EN LA PANTALLA INVISIBLE..."
+          # 🧠 JUGADA 2: Arrancamos VLC en background apuntando a la lista local. 
+          # Pasa del capitulo 1 al 2 de forma síncrona en el monitor virtual sin apagar la señal.
+          vlc --intf dummy --dummy-quiet --play-and-exit --playlist-autostart playlist_local.txt &
+          sleep 2
+
+          echo "📡 [MUTINY TV] ENCIENDIENDO CAÑO MAESTRO DE EMISIÓN ETERNO POR CAPTURA..."
+          
+          # 🧠 JUGADA 3: FFmpeg lo único que hace es "filmar" el display virtual :99 usando x11grab.
+          # Le clava encima tu plantilla, tus contrastes, el crop y tu drawtext leyendo abajo.txt.
+          # Mantiene intacta tu Stream Key de Kick legítima. ¡Inmune absolute a baches de codecs!
+          ffmpeg -y -f x11grab -video_size 1280x720 -i :99.0 \
+            -re -loop 1 -i plantilla_horizontal.png \
+            -filter_complex "[0:v]crop=1270:710:5:5,eq=contrast=1.12:brightness=0.02,rotate=0.012:ow=1280:oh=720:fillcolor=black[peli_expandida]; [1:v]scale=1280:720[fondo_base]; [fondo_base][peli_expandida]overlay=0:0:shortest=1[canvas_parcial]; [canvas_parcial]drawtext=textfile=abajo.txt:reload=1:x=30:y=665:fontsize=24:fontcolor=0x00e676:fontfile=/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf:box=1:boxcolor=black@0.5:boxborderw=4[canvas_fusionado]" \
+            -r 30 -g 60 -keyint_min 60 -map "[canvas_fusionado]" -an -sn -dn -pix_fmt yuv420p \
+            -c:v libx264 -preset ultrafast -tune zerolatency -b:v 2500k -maxrate 2500k -bufsize 12000k \
+           # 🪓 [REPARADO DEFINITIVO SRT O_UTPUT v900]
+           # 1. Cambiamos -f flv por -f mpegts (El idioma nativo de SRT)
+           # 2. Le pegamos el chorizo entero de tu link entre comillas para que Linux lo asimile sin marearse
+           -f mpegts "srt://fa723fc1b171.srt.live-video.net:9000?streamid=sk_us-west-2_MqGIuZCjdkwn_W8taony5k1gvPaCz1F7MWd2Rd0QAvb&passphrase=vrdzu5pih7bmRaVralELJ2wlBzrQPgsp08kGoZmPTKkqlkbN8CPzuUEYUtJU5ivRJE6nBqIOGPr2V1Q"
+
+          echo "🏁 La maratón en el monitor virtual ha finalizado. Satélite apagado."
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
