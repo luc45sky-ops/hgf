@@ -1,4 +1,4 @@
-name: 📡 Mutiny TV IPTV Pirate Engine v930 - Universal SRT Core
+name: 📡 Mutiny TV IPTV Pirate Engine v935 - Universal SRT Core
 
 on:
   workflow_dispatch: # Botón manual de PLAY en la web de GitHub
@@ -19,78 +19,69 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y ffmpeg fonts-dejavu-core curl jq
 
-      - name: 🚀 Emisión Satelital Continua Inmune y Síncrona vía SRT
+      - name: 🚀 Emisión Satelital Universal Continuous y Síncrona vía SRT
         run: |
-          # 🪓 [REACTOR CENTRAL INDUSTRIAL v930 - DIEGO FIFO SYNC CORE]
+          # 🪓 [REACTOR CENTRAL INDUSTRIAL v935 - DIEGO ATOMIC SYNC CORE]
           export TERM=xterm
           
+          # Inicializamos los letreros visuales estables
+          echo "Cargando Maratón Continuo..." > letrero.txt
           echo "🍿 Mutiny TV - Transmisión Soberana en Vivo" > abajo.txt
           
           URL_GIST_PLAYLIST="https://gist.githubusercontent.com/jav45dev-ctrl/dbe1c5ce7ae9ceb4596c07ddf99fab18/raw/playlist.txt"
 
-          echo "📡 [MUTINY TV] SUCCIONANDO PLAYLIST REMOTA DESDE EL GIST..."
-          curl -L -s "$URL_GIST_PLAYLIST" | tr -d '\r' | sed '/^$/d' > grilla_remota.txt
-
-          # 1. PRE-DESCARGA SATELITAL A 100 MB/S: Bajamos tus fideos del Gist al disco virtual
+          echo "📡 [MUTINY TV] SUCCIONANDO GRILLA REMOTA DESDE EL GIST..."
+          # 1. Chupamos tu playlist del Gist privado
+          curl -L -s "$URL_GIST_PLAYLIST" | tr -d '\r' | sed '/^$/d' > grilla_cruda.txt
+          
+          # Inicializamos el bloc de notas local de forma rígida para el motor de concatenación
+          echo "# Lista de videos locales para concat" > playlist_local.txt
+          
           contador=1
+          
+          # 2. DESCARGA SATELITAL COMP_ACTA: 
+          # Chupamos tus fideos del Gist directos al disco rígido local de Microsoft a 100 MB/s
           while read -r linea || [ -n "$linea" ]; do
             URL_INTERNET=$(echo "$linea" | awk -F'|' '{print $1}' | tr -d ' ')
+            
             if [ -n "$URL_INTERNET" ]; then
               echo "📥 Pre-descargando Tramo $contador al almacenamiento virtual: $URL_INTERNET"
               curl -L -H "Authorization: token ${{ secrets.TOKEN_B }}" \
                    -H "User-Agent: VLC/3.0.18 LibVLC/3.0.18" \
-                   -o "fideo_${contador}.mp4" "$URL_INTERNET"
+                   -o "local_part_${contador}.mp4" "$URL_INTERNET"
+              
+              echo "file 'local_part_${contador}.mp4'" >> playlist_local.txt
               contador=$((contador + 1))
             fi
-          done < grilla_remota.txt
+          done < grilla_cruda.txt
 
-          echo "🪓 [MUTINY] DETECTANDO PRIMER TÍTULO DE LA MARATÓN..."
-          PRIMERA_LINEA=$(head -n 1 grilla_remota.txt)
+          echo "🪓 [MUTINY] DETECTANDO TÍTULO DE INICIO DE PANTALLA..."
+          PRIMERA_LINEA=$(head -n 1 grilla_cruda.txt)
           TITULO_INICIAL=$(echo "$PRIMERA_LINEA" | awk -F'|' '{print $2}' | sed 's/^[ \t]*//;s/[ \t]*$//')
-          echo "${TITULO_INICIAL:-🍿 Mutiny TV - Cine Continuo}" > abajo.txt
+          echo "${TITULO_INICIAL:-🟢 Maratón Continuo Mutiny TV}" > letrero.txt
 
-          echo "📡 [MUTINY TV] CREANDO TUBERÍA RE-DIRECCIONADA FIFO POR HARDWARE..."
-          # 🧠 JUGADA 1: Creamos un caño de datos de video local en la carpeta temporal de Linux
-          rm -f /tmp/mutiny_pipe
-          mkfifo /tmp/mutiny_pipe
+          echo "🪓 [MUTINY] COMPROBANDO LA CAÑERÍA LOCAL INMUNE EN EL DISPLAY:"
+          cat playlist_local.txt
 
-          # 🧠 JUGADA 2: El alimentador de la tubería corre en background.
-          # Agarra los videos descargados y les extrae strictly la pista de video en bruto,
-          # metiéndolos en fila india recta adentro del caño /tmp/mutiny_pipe sin baches sordos.
-          (
-            while true; do
-              num=1
-              while [ -f "fideo_${num}.mp4" ]; do
-                echo "🎬 Inyectando video de fideo_${num}.mp4 a la tubería..."
-                ffmpeg -y -v quiet -i "fideo_${num}.mp4" -f rawvideo -c:v rawvideo -an -fflags +genpts -f mpegts - >> /tmp/mutiny_pipe
-                num=$((num + 1))
-                sleep 0.5
-              done
-              echo "🔄 Fin de la grilla. Pegando la vuelta..."
-            done
-          ) &
-          sleep 2
-
-          echo "📡 [MUTINY TV] ENCIENDIENDO CAÑO MAESTRO DE EMISIÓN SRT UN_I_F_I_CA_DO..."
+          echo "📡 [MUTINY TV] ENCIENDIENDO CAÑO MAESTRO DE EMISIÓN BIÓNICO SÍNCRONO..."
           
-          # 🧠 JUGADA FINAL DIEGO CHESSMASTER v930:
-          # Input 0: Se clava a chupar el flujo continuo de video de la tubería /tmp/mutiny_pipe (Inmune a cortes).
-          # Input 1: El primer fideo de video local directo de chapa para extraerle el audio binario original síncrono.
-          # -vf "scale=1280:720..." -> Te infla la lona al tamaño exacto de Kick metiendo barras negras para no deformar nada.
-          # -af "aresample=async=1" -> Embrague atómico que clava los labios al frame.
-          # Inyectamos video expandido y audio real latino por el tubo de SRT directo a tu cuenta de test.
+          # 3. EL REMACHE MAESTRO ATÓMICO v935:
+          # -f concat muerde la lista de videos locales.
+          # [0:v]scale=... -> Te infla la lona al tamaño exacto de Kick metiendo barras negras para no deformar.
+          # [0:a]aresample=async=1[audio_sincronizado] -> FUSIONA el audio adentro del filtro complejo en la misma matriz.
+          # Mapeamos estrictamente las salidas del filtro complejo ([canvas_fusionado] y [audio_sincronizado]).
+          # Inyectamos video expandido y audio real latino por el tubo de SRT directo a tu canal principal entre comillas simples.
           ffmpeg -y \
             -fflags +genpts+igndts+flush_packets+discardcorrupt+nofillin -re -async 1 \
-            -f mpegts -i /tmp/mutiny_pipe \
-            -stream_loop -1 -i fideo_1.mp4 \
-            -vf "scale=1280:720:force_original_aspect_ratio=decrease,pad=1280:720:(ow-iw)/2:(oh-ih)/2,drawtext=textfile=abajo.txt:reload=1:x=30:y=665:fontsize=24:fontcolor=0x00e676:fontfile=/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf:box=1:boxcolor=black@0.5:boxborderw=4" \
-            -map 0:v -map 1:a:0? -r 30 -g 60 -keyint_min 60 -pix_fmt yuv420p \
+            -f concat -safe 0 \
+            -i playlist_local.txt \
+            -re -loop 1 -i plantilla_horizontal.png \
+            -filter_complex "[0:v]scale=1280:720:force_original_aspect_ratio=decrease,pad=1280:720:(ow-iw)/2:(oh-ih)/2,eq=contrast=1.12:brightness=0.02,rotate=0.012:ow=1280:oh=720:fillcolor=black[peli_expandida]; [1:v]scale=1280:720[fondo_base]; [fondo_base][peli_expandida]overlay=0:0:shortest=1[canvas_parcial]; [canvas_parcial]drawtext=textfile=abajo.txt:reload=1:x=30:y=665:fontsize=24:fontcolor=0x00e676:fontfile=/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf:box=1:boxcolor=black@0.5:boxborderw=4[canvas_fusionado]; [0:a]aresample=async=1[audio_sincronizado]" \
+            -map "[canvas_fusionado]" -map "[audio_sincronizado]" -r 30 -g 60 -keyint_min 60 -pix_fmt yuv420p \
             -c:v libx264 -preset ultrafast -tune zerolatency -b:v 2500k -maxrate 2500k -bufsize 12000k \
-            -c:a aac -b:a 128k -ac 2 -ar 44100 -af aresample=async=1 \
+            -c:a aac -b:a 128k -ac 2 -ar 44100 \
             -f mpegts 'srt://fa723fc1b171.srt.live-video.net:9000?streamid=sk_us-west-2_yb6F1b18xTEE_QpaA7pm407C0FAAGgZPTqZHvtIJM2Q&passphrase=TNdOSyQpbrmfMc85yiQmEOTXpabTk4fDiu5tou4DGeJHknaCGXcuLjZgDUxzZi36DE1kqYR5ASxK0UR' || true
 
-          echo "🏁 La maratón unificada ha finalizado. Satélite de test apagado."
+          echo "🏁 La maratón unificada síncrona ha finalizado. Satélite apagado."
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-        
