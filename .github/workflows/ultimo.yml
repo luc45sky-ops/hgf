@@ -11,77 +11,82 @@ jobs:
   streaming:
     runs-on: ubuntu-latest
     steps:
-      - name: 🗄️ Inicializando espacio en el disco virtual
+      - name: 🗄️ Clonando el búnker de archivos estáticos
         uses: actions/checkout@v4
 
-      # Instalamos el servidor gráfico fantasma Xvfb y las herramientas nativas puras de FFmpeg
-      - name: ⚙️ Instalando Servidor Gráfico Virtual y Motores Puristas
+      - name: ⚙️ Instalando FFmpeg nativo por hardware en la nube
         run: |
           sudo apt-get update
-          sudo apt-get install -y xvfb ffmpeg fonts-dejavu-core curl jq
+          sudo apt-get install -y ffmpeg fonts-dejavu-core curl jq
 
-      - name: 🚀 Emisión Satelital de Pantalla Completa y Audio Síncrono vía SRT
+      - name: 🚀 Emisión Satelital Universal Continuous y Síncrona vía SRT
         run: |
-          # 🪓 [REACTOR CENTRAL INDUSTRIAL v904 - DUAL-INPUT SYNC AUDIO CORE]
+          # 🪓 [REACTOR CENTRAL INDUSTRIAL v910 - DIEGO UNIVERSAL SYNC CORE]
           export TERM=xterm
+          
+          # Inicializamos los letreros visuales estables
+          echo "Cargando Maratón Continuo..." > letrero.txt
+          echo "🍿 Mutiny TV - Transmisión Soberana en Vivo" > abajo.txt
           
           URL_GIST_PLAYLIST="https://gist.githubusercontent.com/jav45dev-ctrl/dbe1c5ce7ae9ceb4596c07ddf99fab18/raw/playlist.txt"
 
-          echo "📡 [MUTINY TV] INICIALIZANDO MONITOR FANTASMA EN LA RAM VIRTUAL..."
-          # 1. Creamos la pantalla invisible de 1280x720 a 24 bits de color en el display :99
-          Xvfb :99 -screen 0 1280x720x24 &
-          export DISPLAY=:99
-          sleep 2
-
-          echo "📡 [MUTINY TV] SUCCIONANDO PLAYLIST REMOTA DESDE EL GIST..."
-          curl -L -s "$URL_GIST_PLAYLIST" | tr -d '\r' | sed '/^$/d' > grilla_remota.txt
-
-          # Fabricamos la lista local limpia de fideos descargados a 108 MB/s satelitales
-          echo "# Lista local para ffplay" > playlist_local.txt
+          echo "📡 [MUTINY TV] SUCCIONANDO GRILLA REMOTA DESDE EL GIST..."
+          # 1. Chupamos tu playlist del Gist privado
+          curl -L -s "$URL_GIST_PLAYLIST" | tr -d '\r' | sed '/^$/d' > grilla_cruda.txt
+          
+          # Inicializamos el bloc de notas local de forma rígida para el motor de concatenación
+          echo "# Lista de videos locales para concat" > playlist_local.txt
+          
           contador=1
           
+          # 2. DESCARGA SATELITAL COMP_ACTA: 
+          # Chupamos tus fideos del Gist directos al disco rígido local de Microsoft a 100 MB/s
           while read -r linea || [ -n "$linea" ]; do
             URL_INTERNET=$(echo "$linea" | awk -F'|' '{print $1}' | tr -d ' ')
+            
             if [ -n "$URL_INTERNET" ]; then
-              echo "📥 Pre-descargando Tramo $contador al disco rígido virtual: $URL_INTERNET"
+              echo "📥 Pre-descargando Tramo $contador al almacenamiento virtual: $URL_INTERNET"
+              
+              # Succiona el video saltando aduanas con tu pasaporte TOKEN_B intacto
               curl -L -H "Authorization: token ${{ secrets.TOKEN_B }}" \
                    -H "User-Agent: VLC/3.0.18 LibVLC/3.0.18" \
-                   -o "fideo_${contador}.mp4" "$URL_INTERNET"
+                   -o "local_part_${contador}.mp4" "$URL_INTERNET"
               
-              echo "fideo_${contador}.mp4" >> playlist_local.txt
+              # Le encastramos strictly la directiva file local requerida por el motor purista
+              echo "file 'local_part_${contador}.mp4'" >> playlist_local.txt
               contador=$((contador + 1))
             fi
-          done < grilla_remota.txt
+          done < grilla_cruda.txt
 
-          echo "🪓 [MUTINY] DETECTANDO PRIMER TÍTULO DE LA MARATÓN..."
-          PRIMERA_LINEA=$(head -n 1 grilla_remota.txt)
+          echo "🪓 [MUTINY] DETECTANDO TÍTULO DE INICIO DE PANTALLA..."
+          PRIMERA_LINEA=$(head -n 1 grilla_cruda.txt)
           TITULO_INICIAL=$(echo "$PRIMERA_LINEA" | awk -F'|' '{print $2}' | sed 's/^[ \t]*//;s/[ \t]*$//')
-          echo "${TITULO_INICIAL:-🍿 Mutiny TV - Cine Continuo}" > abajo.txt
+          echo "${TITULO_INICIAL:-🟢 Maratón Continuo Mutiny TV}" > letrero.txt
 
-          echo "🪓 [MUTINY] ENCIENDIENDO REPRODUCTOR INMUNE FFPLAY EN LA PANTALLA INVISIBLE..."
-          # 🧠 JUGADA MAESTRA deBoxes: Forzamos a ffplay a reproducir el video en mudo (-an)
-          # Escalado a pantalla completa exacta de 1280x720 con barras negras inteligentes para no deformarse.
-          # Al ser mudo local, Linux no te mete trabas administrativas de tarjetas de sonido.
-          ffplay -v quiet -an -vf "scale=1280:720:force_original_aspect_ratio=decrease,pad=1280:720:(ow-iw)/2:(oh-ih)/2" -loop 0 fideo_1.mp4 &
-          sleep 3
+          echo "🪓 [MUTINY] COMPROBANDO LA CAÑERÍA LOCAL INMUNE EN EL DISPLAY:"
+          cat playlist_local.txt
 
-          echo "📡 [MUTINY TV] ENCIENDIENDO CAÑO MAESTRO DE EMISIÓN SRT POR EXTRACCIÓN DIRECTA..."
+          echo "📡 [MUTINY TV] ENCIENDIENDO CAÑO MAESTRO DE EMISIÓN BIÓNICO SÍNCRONO..."
           
-          # 🧠 JUGADA FINAL DIEGO CHESSMASTER:
-          # 1. Input 0: Captura de la pantalla virtual (:99.0) donde ffplay dibuja los frames a pantalla completa.
-          # 2. Input 1: El archivo de video local directo (fideo_1.mp4).
-          # 3. Le clavamos tu letrero verde Mutiny leyendo de abajo.txt de forma limpia.
-          # 4. Mapas: Sincronizamos el video mapeado del canvas [canvas_fusionado] y el audio directo del archivo (-map 1:a).
-          # Inyectamos el flujo continuado por el tubo de SRT directo a tu cuenta nueva con mpegts deBoxes.
-          ffmpeg -y -f x11grab -video_size 1280x720 -i :99.0 \
-            -stream_loop -1 -i fideo_1.mp4 \
-            -vf "drawtext=textfile=abajo.txt:reload=1:x=30:y=665:fontsize=24:fontcolor=0x00e676:fontfile=/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf:box=1:boxcolor=black@0.5:boxborderw=4" \
-            -map 0:v -map 1:a -r 30 -g 60 -keyint_min 60 -pix_fmt yuv420p \
+          # 3. EL REMACHE MAESTRO UNIVERSAL v910 DIEGO CORE:
+          # -f concat muerde la lista de videos locales.
+          # -vf "scale=1280:720..." -> Obliga a CUALQUIER video a estirarse a 1280x720 exactos de Kick metiendo barras negras si difiere el formato original para no deformarse.
+          # -af "aresample=async=1" -> Embrague atómico de audio, clava los labios de los actores al frame deBoxes.
+          # -f mpegts -> Contenedor purista obligatorio para empujar bits por el tubo de SRT.
+          # Mantiene intactos tus contrastes, el drawtext verde de las noticias y tu clave SRT de pruebas.
+          ffmpeg -y \
+            -fflags +genpts+igndts+flush_packets+discardcorrupt+nofillin -re -async 1 \
+            -f concat -safe 0 \
+            -i playlist_local.txt \
+            -re -loop 1 -i plantilla_horizontal.png \
+            -filter_complex "[0:v]scale=1280:720:force_original_aspect_ratio=decrease,pad=1280:720:(ow-iw)/2:(oh-ih)/2,eq=contrast=1.12:brightness=0.02,rotate=0.012:ow=1280:oh=720:fillcolor=black[peli_expandida]; [1:v]scale=1280:720[fondo_base]; [fondo_base][peli_expandida]overlay=0:0:shortest=1[canvas_parcial]; [canvas_parcial]drawtext=textfile=abajo.txt:reload=1:x=30:y=665:fontsize=24:fontcolor=0x00e676:fontfile=/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf:box=1:boxcolor=black@0.5:boxborderw=4[canvas_fusionado]" \
+            -r 30 -g 60 -keyint_min 60 -map "[canvas_fusionado]" -map 0:a:0? -pix_fmt yuv420p \
             -c:v libx264 -preset ultrafast -tune zerolatency -b:v 2500k -maxrate 2500k -bufsize 12000k \
-            -c:a aac -b:a 128k -f mpegts "srt://fa723fc1b171.srt.live-video.net:9000?streamid=sk_us-west-2_MqGIuZCjdkwn_W8taony5k1gvPaCz1F7MWd2Rd0QAvb&passphrase=vrdzu5pih7bmRaVralELJ2wlBzrQPgsp08kGoZmPTKkqlkbN8CPzuUEYUtJU5ivRJE6nBqIOGPr2V1Q" || true
+            -c:a aac -b:a 128k -ac 2 -ar 44100 -af aresample=async=1 \
+            -f mpegts "srt://fa723fc1b171.srt.live-video.net:9000?streamid=sk_us-west-2_MqGIuZCjdkwn_W8taony5k1gvPaCz1F7MWd2Rd0QAvb&passphrase=vrdzu5pih7bmRaVralELJ2wlBzrQPgsp08kGoZmPTKkqlkbN8CPzuUEYUtJU5ivRJE6nBqIOGPr2V1Q" || true
 
-          echo "🏁 La maratón en el monitor virtual ha finalizado. Satélite de test apagado."
+          print "🏁 La maratón universal síncrona ha finalizado. Satélite de test apagado."
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-   
+         
