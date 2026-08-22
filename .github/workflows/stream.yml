@@ -37,7 +37,7 @@ jobs:
           
           while true; do
             # Descargamos tu playlist unificada del Gist privado
-            curl "https://gist.githubusercontent.com/jav45dev-ctrl/dbe1c5ce7ae9ceb4596c07ddf99fab18/raw/playlist.txt" | tr -d '\r' | sed '/^$/d' > grilla_local.txt
+            curl -s "https://gist.githubusercontent.com/jav45dev-ctrl/dbe1c5ce7ae9ceb4596c07ddf99fab18/raw/playlist.txt" | tr -d '\r' | sed '/^$/d' > grilla_local.txt
             NUM_LINEA=$(cat linea_actual.txt)
             
             # Capturamos la línea completa rígida del casillero correspondiente (URL | TITULO)
