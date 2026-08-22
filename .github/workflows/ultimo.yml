@@ -1,4 +1,4 @@
-name: 📡 Mutiny TV IPTV Pirate Engine v900.5 - Headless SRT Test Core
+name: 📡 str34mdrome2
 
 on:
   workflow_dispatch: # Botón manual de PLAY en la web de GitHub
@@ -14,21 +14,21 @@ jobs:
       - name: 🗄️ Inicializando espacio en el disco virtual
         uses: actions/checkout@v4
 
-      # Instalamos el servidor gráfico fantasma Xvfb y las herramientas de renderizado
-      - name: ⚙️ Instalando Servidor Gráfico Virtual y Codecs Nativos
+      # Instalamos el servidor gráfico fantasma Xvfb y las herramientas nativas
+      - name: ⚙️ Instalando Servidor Gráfico Virtual y Motores Puristas
         run: |
           sudo apt-get update
-          sudo apt-get install -y xvfb vlc ffmpeg fonts-dejavu-core curl jq
+          sudo apt-get install -y xvfb ffmpeg fonts-dejavu-core curl jq
 
-      - name: 🚀 Emisión Satelital por Captura Inmune de Pantalla Cruda vía SRT
+      - name: 🚀 Emisión Satelital de Pantalla Completa por Inyección SRT Inmune
         run: |
-          # 🪓 [REACTOR CENTRAL INDUSTRIAL v900.5 - HEADLESS SRT CRUDO CORE]
+          # 🪓 [REACTOR CENTRAL INDUSTRIAL v901 - FFPLAY DISPLAY DIEGO CORE]
           export TERM=xterm
          
           URL_GIST_PLAYLIST="https://gist.githubusercontent.com/jav45dev-ctrl/dbe1c5ce7ae9ceb4596c07ddf99fab18/raw/playlist.txt"
 
           echo "📡 [MUTINY TV] INICIALIZANDO MONITOR FANTASMA EN LA RAM VIRTUAL..."
-          # Creamos la pantalla invisible de 1280x720 a 24 bits de color en el display :99
+          # 1. Creamos la pantalla invisible de 1280x720 a 24 bits de color en el display :99
           Xvfb :99 -screen 0 1280x720x24 &
           export DISPLAY=:99
           sleep 2
@@ -36,8 +36,8 @@ jobs:
           echo "📡 [MUTINY TV] SUCCIONANDO PLAYLIST REMOTA DESDE EL GIST..."
           curl -L -s "$URL_GIST_PLAYLIST" | tr -d '\r' | sed '/^$/d' > grilla_remota.txt
 
-          # Fabricamos la lista nativa de archivos locales para que VLC no sufra tirones de red
-          echo "# Lista local" > playlist_local.txt
+          # Fabricamos la lista local limpia de fideos descargados a 108 MB/s satelitales
+          echo "# Lista local para ffplay" > playlist_local.txt
           contador=1
           
           while read -r linea || [ -n "$linea" ]; do
@@ -48,29 +48,45 @@ jobs:
                    -H "User-Agent: VLC/3.0.18 LibVLC/3.0.18" \
                    -o "fideo_${contador}.mp4" "$URL_INTERNET"
               
+              # Le encastramos la URL local al bloc de notas purista de ffplay
               echo "fideo_${contador}.mp4" >> playlist_local.txt
               contador=$((contador + 1))
             fi
           done < grilla_remota.txt
 
-          echo "🪓 [MUTINY] LANZANDO REPRODUCTOR MULTIMEDIA EN LA PANTALLA INVISIBLE..."
-          # Arrancamos VLC en background apuntando a la lista local dentro del monitor virtual :99
-          vlc --intf dummy --dummy-quiet --play-and-exit --playlist-autostart playlist_local.txt &
-          sleep 2
+          echo "🪓 [MUTINY] DETECTANDO PRIMER TÍTULO DE LA MARATÓN..."
+          PRIMERA_LINEA=$(head -n 1 grilla_remota.txt)
+          TITULO_INICIAL=$(echo "$PRIMERA_LINEA" | awk -F'|' '{print $2}' | sed 's/^[ \t]*//;s/[ \t]*$//')
+          echo "${TITULO_INICIAL:-🍿 Mutiny TV - Cine Continuo}" > abajo.txt
 
-          echo "📡 [MUTINY TV] ENCIENDIENDO CAÑO MAESTRO DE EMISIÓN SRT DE PANTALLA PURA..."
+          echo "🪓 [MUTINY] ENCIENDIENDO REPRODUCTOR INMUNE FFPLAY EN EL MONITOR VIRTUAL..."
+          # 🧠 JUGADA MAESTRA deBoxes: Forzamos a FFplay a reproducir la lista local en pantalla completa (-fs)
+          # Le inyectamos -an (mudo local) y -nodisp para que no pida hardware de audio,
+          # obligándolo a dibujar los marcos de la película directo en el display :99 de la RAM.
+          # Usamos un bucle while read para que camine los archivos locales de a uno sin cortes.
+          while read -r pelicula_local || [ -n "$pelicula_local" ]; do
+            if [[ "$pelicula_local" != "#"* ]]; then
+               echo "🎬 Reproduciendo en el monitor invisible: $pelicula_local"
+               ffplay -v quiet -fs -an -autoexit "$pelicula_local"
+            fi
+          done < playlist_local.txt &
+          sleep 3
+
+          echo "📡 [MUTINY TV] ENCIENDIENDO CAÑO MAESTRO DE EMISIÓN SRT POR CAPTURA..."
           
-          # 🧠 [REPARADO DEFINITIVO v900.5 - BYPASS DE IMÁGENES PARÁSITAS]:
-          # Volamos la plantilla, los crops y los overlays parásitos que te daban portazo.
-          # FFmpeg filma strictly la pantalla cruda a 30 FPS y la inyecta por el tubo de SRT.
-          # Cambiamos -f flv por -f mpegts inyectándole el chorizo entero de tu nueva clave de test.
+          # 🧠 JUGADA FINAL DIEGO CHESSMASTER:
+          # Capturamos el monitor virtual :99. Le inyectamos una pista de audio estéreo virtual muda (-f lavfi -i anullsrc)
+          # para que Kick reciba el flujo unificado síncrono que exige el protocolo SRT sin dar pantallas congeladas.
+          # Le acoplamos la marquesina de noticias goteando abajo leyendo de abajo.txt.
           ffmpeg -y -f x11grab -video_size 1280x720 -i :99.0 \
-            -pix_fmt yuv420p -r 30 -g 60 -keyint_min 60 \
+            -f lavfi -i anullsrc=channel_layout=stereo:sample_rate=44100 \
+            -filter_complex "[0:v]drawtext=textfile=abajo.txt:reload=1:x=30:y=665:fontsize=24:fontcolor=0x00e676:fontfile=/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf:box=1:boxcolor=black@0.5:boxborderw=4[canvas_fusionado]" \
+            -map "[canvas_fusionado]" -map 1:a -r 30 -g 60 -keyint_min 60 -pix_fmt yuv420p \
             -c:v libx264 -preset ultrafast -tune zerolatency -b:v 2500k -maxrate 2500k -bufsize 12000k \
-            -f mpegts "srt://fa723fc1b171.srt.live-video.net:9000?streamid=sk_us-west-2_MqGIuZCjdkwn_W8taony5k1gvPaCz1F7MWd2Rd0QAvb&passphrase=vrdzu5pih7bmRaVralELJ2wlBzrQPgsp08kGoZmPTKkqlkbN8CPzuUEYUtJU5ivRJE6nBqIOGPr2V1Q" || true
+            -c:a aac -b:a 128k -f mpegts "srt://fa723fc1b171.srt.live-video.net:9000?streamid=sk_us-west-2_MqGIuZCjdkwn_W8taony5k1gvPaCz1F7MWd2Rd0QAvb&passphrase=vrdzu5pih7bmRaVralELJ2wlBzrQPgsp08kGoZmPTKkqlkbN8CPzuUEYUtJU5ivRJE6nBqIOGPr2V1Q" || true
 
-          echo "🏁 La maratón en el monitor virtual ha finalizado. Satélite apagado."
+          echo "🏁 La maratón en el monitor virtual ha finalizado. Satélite de test apagado."
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-        
+      
