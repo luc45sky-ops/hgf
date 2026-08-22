@@ -14,28 +14,21 @@ jobs:
       - name: 🗄️ Inicializando espacio en el disco virtual
         uses: actions/checkout@v4
 
-      # Instalamos el servidor gráfico fantasma Xvfb, herramientas de audio digital simuladas y pulseaudio
-      - name: ⚙️ Instalando Servidor Gráfico Virtual y Tarjeta de Sonido Virtual
+      # Instalamos el servidor gráfico fantasma Xvfb y las herramientas nativas puras de FFmpeg
+      - name: ⚙️ Instalando Servidor Gráfico Virtual y Motores Puristas
         run: |
           sudo apt-get update
-          sudo apt-get install -y xvfb ffmpeg fonts-dejavu-core curl jq pulseaudio alsa-utils
+          sudo apt-get install -y xvfb ffmpeg fonts-dejavu-core curl jq
 
       - name: 🚀 Emisión Satelital de Pantalla Completa y Audio Síncrono vía SRT
         run: |
-          # 🪓 [REACTOR CENTRAL INDUSTRIAL v903 - PULSEAUDIO DISPLAY CORE]
+          # 🪓 [REACTOR CENTRAL INDUSTRIAL v904 - DUAL-INPUT SYNC AUDIO CORE]
           export TERM=xterm
           
           URL_GIST_PLAYLIST="https://gist.githubusercontent.com/jav45dev-ctrl/dbe1c5ce7ae9ceb4596c07ddf99fab18/raw/playlist.txt"
 
-          echo "📡 [MUTINY TV] ENCIENDIENDO TARJETA DE AUDIO DIGITAL INVISIBLE..."
-          # 🧠 JUGADA 1: Inicializamos pulseaudio en background para que ffplay tenga parlantes virtuales adonde escupir el sonido
-          mkdir -p ~/.config/pulse
-          echo "default-server = unix:/tmp/pulse-server" > ~/.config/pulse/client.conf
-          pulseaudio --start --exit-idle-time=-1 --system=false || true
-          sleep 2
-
           echo "📡 [MUTINY TV] INICIALIZANDO MONITOR FANTASMA EN LA RAM VIRTUAL..."
-          # 🧠 JUGADA 2: Creamos la pantalla invisible de 1280x720 a 24 bits de color en el display :99
+          # 1. Creamos la pantalla invisible de 1280x720 a 24 bits de color en el display :99
           Xvfb :99 -screen 0 1280x720x24 &
           export DISPLAY=:99
           sleep 2
@@ -65,27 +58,23 @@ jobs:
           TITULO_INICIAL=$(echo "$PRIMERA_LINEA" | awk -F'|' '{print $2}' | sed 's/^[ \t]*//;s/[ \t]*$//')
           echo "${TITULO_INICIAL:-🍿 Mutiny TV - Cine Continuo}" > abajo.txt
 
-          echo "🪓 [MUTINY] ENCIENDIENDO REPRODUCTOR INMUNE FFPLAY FORCE-SCALE EN EL MONITOR..."
-          # 🧠 JUGADA MAESTRA v903: 
-          # 1. Le dejamos el audio libre para que viaje a la tarjeta digital invisible de pulseaudio.
-          # 2. Forzamos la escala exacta 1280x720 clavada con barras negras inteligentes anti-deformaciones.
-          while read -r pelicula_local || [ -n "$pelicula_local" ]; do
-            if [[ "$pelicula_local" != "#"* ]]; then
-               echo "🎬 Reproduciendo a pantalla completa real: $pelicula_local"
-               ffplay -v quiet -vf "scale=1280:720:force_original_aspect_ratio=decrease,pad=1280:720:(ow-iw)/2:(oh-ih)/2" -autoexit "$pelicula_local"
-            fi
-          done < playlist_local.txt &
-          sleep 4
+          echo "🪓 [MUTINY] ENCIENDIENDO REPRODUCTOR INMUNE FFPLAY EN LA PANTALLA INVISIBLE..."
+          # 🧠 JUGADA MAESTRA deBoxes: Forzamos a ffplay a reproducir el video en mudo (-an)
+          # Escalado a pantalla completa exacta de 1280x720 con barras negras inteligentes para no deformarse.
+          # Al ser mudo local, Linux no te mete trabas administrativas de tarjetas de sonido.
+          ffplay -v quiet -an -vf "scale=1280:720:force_original_aspect_ratio=decrease,pad=1280:720:(ow-iw)/2:(oh-ih)/2" -loop 0 fideo_1.mp4 &
+          sleep 3
 
-          echo "📡 [MUTINY TV] ENCIENDIENDO CAÑO MAESTRO DE EMISIÓN SRT POR CAPTURA..."
+          echo "📡 [MUTINY TV] ENCIENDIENDO CAÑO MAESTRO DE EMISIÓN SRT POR EXTRACCIÓN DIRECTA..."
           
           # 🧠 JUGADA FINAL DIEGO CHESSMASTER:
-          # Capturamos el monitor virtual :99.0 entero a pantalla completa real.
-          # Capturamos el audio digital nativo desde pulseaudio usando el driver de entrada pulse.
-          # Le acoplamos tu letrero verde Mutiny leyendo de abajo.txt de forma directa sin filtros complejos rotos.
-          # Inyectamos el video expandido y el sonido latino por el tubo de SRT con mpegts.
+          # 1. Input 0: Captura de la pantalla virtual (:99.0) donde ffplay dibuja los frames a pantalla completa.
+          # 2. Input 1: El archivo de video local directo (fideo_1.mp4).
+          # 3. Le clavamos tu letrero verde Mutiny leyendo de abajo.txt de forma limpia.
+          # 4. Mapas: Sincronizamos el video mapeado del canvas [canvas_fusionado] y el audio directo del archivo (-map 1:a).
+          # Inyectamos el flujo continuado por el tubo de SRT directo a tu cuenta nueva con mpegts deBoxes.
           ffmpeg -y -f x11grab -video_size 1280x720 -i :99.0 \
-            -f pulse -i default \
+            -stream_loop -1 -i fideo_1.mp4 \
             -vf "drawtext=textfile=abajo.txt:reload=1:x=30:y=665:fontsize=24:fontcolor=0x00e676:fontfile=/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf:box=1:boxcolor=black@0.5:boxborderw=4" \
             -map 0:v -map 1:a -r 30 -g 60 -keyint_min 60 -pix_fmt yuv420p \
             -c:v libx264 -preset ultrafast -tune zerolatency -b:v 2500k -maxrate 2500k -bufsize 12000k \
@@ -94,3 +83,5 @@ jobs:
           echo "🏁 La maratón en el monitor virtual ha finalizado. Satélite de test apagado."
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+   
