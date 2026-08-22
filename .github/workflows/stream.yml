@@ -1,0 +1,83 @@
+name: 📡 Mutiny TV IPTV Pirate Engine v800 - Perpetual Gist Core
+
+on:
+  workflow_dispatch: # Botón manual de PLAY en la web de GitHub
+
+jobs:
+  streaming:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 🗄️ Clonando el búnker de archivos estáticos
+        uses: actions/checkout@v4
+
+      - name: ⚙️ Instalando FFmpeg nativo por hardware en la nube
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg fonts-dejavu-core curl jq
+
+      - name: 🚀 Emisión Directa Unificada hacia Kick de Largo Fluido Perpetuo
+        run: |
+          # 🪓 [REACTOR CENTRAL INDUSTRIAL v800 - DIEGO PERPETUAL GIST CORE]
+          export TERM=xterm
+          
+          # Inicializamos los letreros visuales estables
+          echo "Cargando Maratón Continuo..." > letrero.txt
+          echo "🍿 Mutiny TV - Transmisión Soberana en Vivo" > abajo.txt
+          
+          URL_GIST_PLAYLIST="https://gist.githubusercontent.com/jav45dev-ctrl/897466184bd6ae71d5fe8f8f45a2651e/raw/playlist.txt"
+
+          echo "📡 [MUTINY TV] SUCCIONANDO GRILLA REMOTA DESDE EL GIST..."
+          # 1. Chupamos tu playlist del Gist privado
+          curl -L -s "$URL_GIST_PLAYLIST" | tr -d '\r' | sed '/^$/d' > grilla_cruda.txt
+          
+          # Inicializamos el bloc de notas local de forma rígida para FFmpeg
+          echo "# Lista de videos locales para concat" > playlist_local.txt
+          
+          contador=1
+          
+          # 2. EL EMBRAGUE SATELITAL CON PURGA DE NOTICIAS: 
+          # Descargamos los fideos directo a la RAM local a 100 MB/s saltando el límite de 2GB
+          while read -r linea || [ -n "$linea" ]; do
+            URL_INTERNET=$(echo "$linea" | awk -F'|' '{print $1}' | tr -d ' ')
+            
+            if [ -n "$URL_INTERNET" ]; then
+              echo "📥 Pre-descargando Tramo $contador de internet al disco rígido local: $URL_INTERNET"
+              
+              # Succiona el video saltando aduanas de GitHub con tu pasaporte TOKEN_B intacto
+              curl -L -H "Authorization: token ${{ secrets.TOKEN_B }}" \
+                   -H "User-Agent: VLC/3.0.18 LibVLC/3.0.18" \
+                   -o "local_part_${contador}.mp4" "$URL_INTERNET"
+              
+              # Le encastramos el archivo local puro al bloc de notas
+              echo "file 'local_part_${contador}.mp4'" >> playlist_local.txt
+              contador=$((contador + 1))
+            fi
+          done < grilla_cruda.txt
+
+          echo "🪓 [MUTINY] DETECTANDO TÍTULO DE INICIO..."
+          PRIMERA_LINEA=$(head -n 1 grilla_cruda.txt)
+          TITULO_INICIAL=$(echo "$PRIMERA_LINEA" | awk -F'|' '{print $2}' | sed 's/^[ \t]*//;s/[ \t]*$//')
+          echo "${TITULO_INICIAL:-🟢 Maratón Continuo Mutiny TV}" > letrero.txt
+
+          echo "🪓 [MUTINY] COMPROBANDO LA CAÑERÍA LOCAL INMUNE EN EL DISPLAY:"
+          cat playlist_local.txt
+
+          echo "📡 [MUTINY TV] ENCIENDIENDO CAÑO MAESTRO DE EMISIÓN ETERNO LIBRE DE NOTICIAS..."
+          
+          # 3. EL REMACHE DEF_INITIVO: FFmpeg corre en frío sobre archivos locales puros.
+          # Al volar el bucle de noticias de fondo, blindamos el ancho de banda al 100% para el video.
+          # Mantiene intactos tus contrastes, el crop, tu drawtext y tu Stream Key de Kick legítima deBoxes.
+          ffmpeg -y \
+            -fflags +genpts+igndts+flush_packets+discardcorrupt+nofillin -re -async 1 \
+            -f concat -safe 0 \
+            -i playlist_local.txt \
+            -re -loop 1 -i plantilla_horizontal.png \
+            -filter_complex "[0:v]scale=1280:720,crop=1270:710:5:5,eq=contrast=1.12:brightness=0.02,rotate=0.012:ow=1280:oh=720:fillcolor=black[peli_expandida]; [1:v]scale=1280:720[fondo_base]; [fondo_base][peli_expandida]overlay=0:0:shortest=1[canvas_parcial]; [canvas_parcial]drawtext=textfile=letrero.txt:reload=1:x=30:y=25:fontsize=24:fontcolor=0x00e676:fontfile=/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf:box=1:boxcolor=black@0.6:boxborderw=5,drawtext=textfile=abajo.txt:reload=1:x=30:y=665:fontsize=24:fontcolor=0x00e676:fontfile=/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf:box=1:boxcolor=black@0.5:boxborderw=4[canvas_fusionado]" \
+            -r 30 -g 60 -keyint_min 60 -map 0:a:0? -map "[canvas_fusionado]" -sn -dn -pix_fmt yuv420p \
+            -c:v libx264 -preset ultrafast -tune zerolatency -b:v 2500k -maxrate 2500k -bufsize 12000k \
+            -c:a aac -b:a 128k -ac 2 -ar 44100 -af aresample=async=1 \
+            -f flv "rtmps://fa723fc1b171.global-contribute.live-video.net/app/sk_us-west-2_yb6F1b18xTEE_QpaA7pm407C0FAAGgZPTqZHvtIJM2Q" || true
+
+          echo "🏁 La maratón ha finalizado de largo fluido. Satélite apagado."
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
