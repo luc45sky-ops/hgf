@@ -23,13 +23,16 @@ jobs:
       - name: 🗄️ Inicializando espacio en el disco virtual de Microsoft
         uses: actions/checkout@v4
 
-      # Setup FFmpeg ultra-rápido en 4 segundos sordos
-      - name: ⚙️ Setup FFmpeg Nativo en la Nube
-        uses: federicocarboni/setup-ffmpeg@v3
+      # [REPARADO DEFINITIVO v5.6]: Volamos el setup-ffmpeg que crasheaba por culpa de Node 24.
+      # Instalamos FFmpeg nativo por hardware directo desde las cañerías del sistema de Linux.
+      - name: ⚙️ Instalación Directa de FFmpeg Nativo Inmune a Node
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg curl jq
 
       - name: 🚀 Clonación Satelital y Normalización de ADN Multimedia a la RAM
         run: |
-          # 🪓 [REACTOR CENTRAL INDUSTRIAL v5.5 - DIEGO SMART SPLIT CORE]
+          # 🪓 [REACTOR CENTRAL INDUSTRIAL v5.6 - DIEGO NODE24 FIXED]
           export TERM=xterm
           
           echo "📥 FASE 1: Succionando los bytes crudos de internet con el extractor inmune..."
@@ -43,46 +46,38 @@ jobs:
           echo "✅ Descarga completada con éxito. Tamaño del archivo crudo:"
           du -sh descarga_cruda.mp4
           
-          echo "📥 FASE 2: Aplicando el Molde de Titanio al archivo local en frío absolute..."
+          echo "📥 FASE 2: Applying el Molde de Titanio al archivo local en frío absolute..."
           ffmpeg -y -i descarga_cruda.mp4 \
             -filter_complex "[0:v]scale=1280:720:force_original_aspect_ratio=decrease,pad=1280:720:(ow-iw)/2:(oh-ih)/2,setsar=1:1[v_moldeado]" \
             -map "[v_moldeado]" -map 0:a:0? -r 30 -pix_fmt yuv420p \
             -c:v libx264 -preset ultrafast -crf 22 -g 60 -keyint_min 60 \
             -c:a aac -b:a 128k -ac 2 -ar 44100 -async 1 "masterizado_temp.mp4"
 
-          # Extirpamos el video crudo de internet para liberar espacio en el disco rígido de Microsoft
           rm -f descarga_cruda.mp4
 
-          # 🪓 FASE 3: EL SENSOR DE CONTROL DE BOXES ANTI-2GB
+          # FASE 3: EL SENSOR DE CONTROL DE BOXES ANTI-2GB
           PESO_BYTES=$(stat -c%s "masterizado_temp.mp4")
-          LIMITE_BYTES=2000000000 # 2 GB de aduana estricta de la API
+          LIMITE_BYTES=2000000000 
           
           NOMBRE_SOLICITADO="${{ github.event.inputs.nombre_pelicula }}"
           BASE_NAME="${NOMBRE_SOLICITADO%.mp4}"
 
           if [ $PESO_BYTES -gt $LIMITE_BYTES ]; then
-            echo "⚠️ [ALERTA DE HARDWARE] El archivo masterizado pesa $(du -sh masterizado_temp.mp4 | awk '{print $1}'), superando el límite de 2 GB."
+            echo "⚠️ [ALERTA DE HARDWARE] El archivo masterizado superó el límite de 2 GB."
             echo "✂️ Iniciando guillotina síncrona en dos partes exactas..."
 
-            # Calculamos la duración exacta del fideo en segundos usando ffprobe
             DURACION_TOTAL=$(ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:keyvalue=1=0 masterizado_temp.mp4 | awk -F. '{print $1}')
             MITAD_TIEMPO=$((DURACION_TOTAL / 2))
 
             echo "🎞️ Duración total: $DURACION_TOTAL segundos. Cortando en el segundo: $MITAD_TIEMPO"
 
-            # PARTE 1: Del segundo 0 hasta la mitad. Copia binaria directa ultra-rápida sin perder calidad.
             ffmpeg -y -ss 0 -i masterizado_temp.mp4 -t $MITAD_TIEMPO -c copy -map 0 "parte_1.mp4"
-            
-            # PARTE 2: De la mitad hasta el final. Le estampamos tu distintivo rígido reemplazando el .mp4 por _2.mp4
             ffmpeg -y -ss $MITAD_TIEMPO -i masterizado_temp.mp4 -c copy -map 0 "${BASE_NAME}_2.mp4"
 
-            # Renomramos la parte 1 al nombre solicitado limpio original
             mv parte_1.mp4 "$NOMBRE_SOLICITADO"
-
-            # Purgamos el residuo gigante temporal para dejar el chasis en 0 MB antes de subir
             rm -f masterizado_temp.mp4
             
-            echo "✅ Guillotina ejecutada. Archivos listos para inyección:"
+            echo "✅ Guillotina ejecutada deBoxes."
             ls -lh *.mp4
           else
             echo "🟢 [HARDWARE SALUDABLE] El archivo está por debajo del límite administrativo."
