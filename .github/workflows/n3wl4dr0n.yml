@@ -36,7 +36,13 @@ jobs:
           export TERM=xterm
           
           echo "📥 FASE 1: Succionando los bytes crudos de internet con el extractor inmune..."
-          curl -L -A "VLC/3.0.18 LibVLC/3.0.18" -o descarga_cruda.mp4 "${{ github.event.inputs.url_pirata }}"
+          # [REPARADO DEFINITIVO v5.7]: Le encastramos re-intentos elásticos con delay.
+          # Si Star Latino corta el chorro, curl insiste 5 veces automáticas re-enganchando el flete.
+          curl -L -A "VLC/3.0.18 LibVLC/3.0.18" \
+               --connect-timeout 10 \
+               --retry 5 \
+               --retry-delay 3 \
+               -o descarga_cruda.mp4 "${{ github.event.inputs.url_pirata }}"
 
           if [ ! -s "descarga_cruda.mp4" ]; then
              echo "❌ El extractor de red se congeló o el link caducó en internet. Abortando."
