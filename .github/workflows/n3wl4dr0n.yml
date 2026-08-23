@@ -1,4 +1,4 @@
-name: 📡 Mutiny TV - Ladrón de Contenido Síncrono Local
+name: 📡 LADRON DEF
 
 on:
   workflow_dispatch: # Botón manual de PLAY en la web de GitHub con 2 casilleros
@@ -29,16 +29,12 @@ jobs:
 
       - name: 🚀 Clonación Satelital y Normalización de ADN Multimedia a la RAM
         run: |
-          # 🪓 [REACTOR CENTRAL INDUSTRIAL v5.2 - DIEGO CURL BYPASS CORE]
+          # 🪓 [REACTOR CENTRAL INDUSTRIAL v5.5 - DIEGO SMART SPLIT CORE]
           export TERM=xterm
           
           echo "📥 FASE 1: Succionando los bytes crudos de internet con el extractor inmune..."
-          
-          # [REPARADO DEFINITIVO v5.2]: Volamos a ffmpeg de la descarga de red para aplastar el SegFault.
-          # Usamos curl -L con tu cabecera VLC para chupar el archivo directo al disco como un bloque de titanio.
           curl -L -A "VLC/3.0.18 LibVLC/3.0.18" -o descarga_cruda.mp4 "${{ github.event.inputs.url_pirata }}"
 
-          # Verificación de chapa anti-bancarrota de la descarga
           if [ ! -s "descarga_cruda.mp4" ]; then
              echo "❌ El extractor de red se congeló o el link caducó en internet. Abortando."
              exit 1
@@ -48,17 +44,50 @@ jobs:
           du -sh descarga_cruda.mp4
           
           echo "📥 FASE 2: Aplicando el Molde de Titanio al archivo local en frío absolute..."
-          
-          # Como el archivo ya es local, el procesador muerde el video sin baches de red,
-          # le aplica el filtro complejo de 1280x720, normaliza el SAR a 1:1 e inyecta los Keyframes fijos (-g 60)
           ffmpeg -y -i descarga_cruda.mp4 \
             -filter_complex "[0:v]scale=1280:720:force_original_aspect_ratio=decrease,pad=1280:720:(ow-iw)/2:(oh-ih)/2,setsar=1:1[v_moldeado]" \
             -map "[v_moldeado]" -map 0:a:0? -r 30 -pix_fmt yuv420p \
             -c:v libx264 -preset ultrafast -crf 22 -g 60 -keyint_min 60 \
-            -c:a aac -b:a 128k -ac 2 -ar 44100 -async 1 "${{ github.event.inputs.nombre_pelicula }}"
+            -c:a aac -b:a 128k -ac 2 -ar 44100 -async 1 "masterizado_temp.mp4"
 
-          echo "✅ Película estandarizada y blindada al 100% de ADN Mutiny. Peso total real:"
-          du -sh "${{ github.event.inputs.nombre_pelicula }}"
+          # Extirpamos el video crudo de internet para liberar espacio en el disco rígido de Microsoft
+          rm -f descarga_cruda.mp4
+
+          # 🪓 FASE 3: EL SENSOR DE CONTROL DE BOXES ANTI-2GB
+          PESO_BYTES=$(stat -c%s "masterizado_temp.mp4")
+          LIMITE_BYTES=2000000000 # 2 GB de aduana estricta de la API
+          
+          NOMBRE_SOLICITADO="${{ github.event.inputs.nombre_pelicula }}"
+          BASE_NAME="${NOMBRE_SOLICITADO%.mp4}"
+
+          if [ $PESO_BYTES -gt $LIMITE_BYTES ]; then
+            echo "⚠️ [ALERTA DE HARDWARE] El archivo masterizado pesa $(du -sh masterizado_temp.mp4 | awk '{print $1}'), superando el límite de 2 GB."
+            echo "✂️ Iniciando guillotina síncrona en dos partes exactas..."
+
+            # Calculamos la duración exacta del fideo en segundos usando ffprobe
+            DURACION_TOTAL=$(ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:keyvalue=1=0 masterizado_temp.mp4 | awk -F. '{print $1}')
+            MITAD_TIEMPO=$((DURACION_TOTAL / 2))
+
+            echo "🎞️ Duración total: $DURACION_TOTAL segundos. Cortando en el segundo: $MITAD_TIEMPO"
+
+            # PARTE 1: Del segundo 0 hasta la mitad. Copia binaria directa ultra-rápida sin perder calidad.
+            ffmpeg -y -ss 0 -i masterizado_temp.mp4 -t $MITAD_TIEMPO -c copy -map 0 "parte_1.mp4"
+            
+            # PARTE 2: De la mitad hasta el final. Le estampamos tu distintivo rígido reemplazando el .mp4 por _2.mp4
+            ffmpeg -y -ss $MITAD_TIEMPO -i masterizado_temp.mp4 -c copy -map 0 "${BASE_NAME}_2.mp4"
+
+            # Renomramos la parte 1 al nombre solicitado limpio original
+            mv parte_1.mp4 "$NOMBRE_SOLICITADO"
+
+            # Purgamos el residuo gigante temporal para dejar el chasis en 0 MB antes de subir
+            rm -f masterizado_temp.mp4
+            
+            echo "✅ Guillotina ejecutada. Archivos listos para inyección:"
+            ls -lh *.mp4
+          else
+            echo "🟢 [HARDWARE SALUDABLE] El archivo está por debajo del límite administrativo."
+            mv masterizado_temp.mp4 "$NOMBRE_SOLICITADO"
+          fi
 
       - name: 💾 Inyectando el Video Intacto en las Releases Locales de esta Cuenta
         uses: softprops/action-gh-release@v2
@@ -66,6 +95,7 @@ jobs:
           tag_name: "bunker_mutiny"
           name: "📦 Mutiny TV - Base de Datos Privada Soberana"
           body: "Aquí viven tus películas resguardadas eternas en calidad HD unificada, SAR 1:1 y Keyframes sincronizados, listas para transmitir de corrido sin apagar el vivo."
-          files: "${{ github.event.inputs.nombre_pelicula }}"
+          files: |
+            *.mp4
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
