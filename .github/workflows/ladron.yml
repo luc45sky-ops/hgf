@@ -1,4 +1,4 @@
-name: 📡 Mutiny TV - Ladrón de Contenido Síncrono Local
+name: 📡 d3strmdrm
 
 on:
   workflow_dispatch: # Botón manual de PLAY en la web de GitHub con 2 casilleros
