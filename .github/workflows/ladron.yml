@@ -12,6 +12,10 @@ on:
         required: true
         default: 'estreno_mutiny.mp4'
 
+permissions:
+  contents: write
+  actions: write
+
 jobs:
   descarga_bunker:
     runs-on: ubuntu-latest
@@ -30,14 +34,11 @@ jobs:
           export TERM=xterm
           
           echo "📥 Descargando fideo digital útil con embrague síncrono de audio..."
-          # Copia de video a 60x espacial + re-muestreo de audio estéreo estándar de televisión.
-          # El flag -async 1 clava los imanes de las pistas borrando el delay de sonido de raíz.
           ffmpeg -y -headers "User-Agent: VLC/3.0.18 LibVLC/3.0.18" \
             -reconnect 1 -reconnect_at_eof 1 -reconnect_streamed 1 -reconnect_delay_max 5 \
             -i "${{ github.event.inputs.url_pirata }}" -c:v copy -c:a aac -ac 2 -ar 44100 -async 1 \
             -bsf:a aac_adtstoasc "${{ github.event.inputs.nombre_pelicula }}" || true
 
-          # Verificación de chapa anti-bancarrota de tus datos móviles
           if [ ! -s "${{ github.event.inputs.nombre_pelicula }}" ]; then
              echo "❌ El caño de red se congeló o el link caducó en internet. Abortando."
              exit 1
@@ -53,5 +54,14 @@ jobs:
           name: "📦 Mutiny TV - Base de Datos Privada Soberana"
           body: "Aquí viven tus películas resguardadas eternas en calidad Ultra-HD y audio síncrono perfecto, listas para transmitir o usar en Surge."
           files: "${{ github.event.inputs.nombre_pelicula }}"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # 🧠 [EL REMACHE MAESTRO DIEGO TWO-STAGE CORE]: 
+      # Gatilla el segundo workflow pasándole el nombre exacto del archivo que acabamos de subir.
+      - name: 🚀 Disparando Segundo Tiempo - El Normalizador de ADN Mutiny
+        run: |
+          echo "Disparando el formateador elástico en background..."
+          gh workflow run "normalizador.yml" -f archivo_blanco="${{ github.event.inputs.nombre_pelicula }}"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
