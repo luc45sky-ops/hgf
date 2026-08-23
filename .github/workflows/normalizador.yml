@@ -1,0 +1,66 @@
+name: 🎛️ Mutiny TV - Normalizador Elástico de ADN Multimedia
+
+on:
+  workflow_dispatch: # Permite gatillarlo manual si querés
+    inputs:
+      archivo_blanco:
+        description: 'Nombre del archivo .mp4 a rescatar de la Release'
+        required: true
+        default: 'estreno_mutiny.mp4'
+
+permissions:
+  contents: write
+  actions: write
+
+jobs:
+  normalizar_video:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 🗄️ Inicializando espacio de procesamiento
+        uses: actions/checkout@v4
+
+      - name: ⚙️ Instalación Directa de FFmpeg Nativo
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg curl jq
+
+      - name: 🛠️ Succión desde Release, Moldeado de Titanio y Re-Inyección
+        run: |
+          # 🪓 [REACTOR DE RELEVOS v1.0 - DIEGO NORMALIZER CORE]
+          export TERM=xterm
+          TARGET="${{ github.event.inputs.archivo_blanco }}"
+          
+          echo "📥 FASE 1: Descargando fideo crudo desde tu propio cofre seguro..."
+          # Usamos la API nativa de GitHub CLI para bajarnos el video que subió el Ladrón 1 en un segundo sordo
+          gh release download bunker_mutiny -p "$TARGET" || true
+
+          if [ ! -s "$TARGET" ]; then
+            echo "❌ No encontré el archivo $TARGET en las Releases. Abortando flete."
+            exit 1
+          fi
+
+          echo "📥 FASE 2: Aplicando el Molde de Titanio al archivo local en frío absolute..."
+          # Como el video ya está local y la red de Microsoft es inmune a cortes, FFmpeg trabaja al ras del silicio.
+          # Le clava el molde unificado de 1280x720, Keyframes cada 2 segundos (-g 60) y el peso pluma CRF-22.
+          ffmpeg -y -i "$TARGET" \
+            -filter_complex "[0:v]scale=1280:720:force_original_aspect_ratio=decrease,pad=1280:720:(ow-iw)/2:(oh-ih)/2,setsar=1:1[v_moldeado]" \
+            -map "[v_moldeado]" -map 0:a:0? -r 30 -pix_fmt yuv420p \
+            -c:v libx264 -preset ultrafast -crf 22 -g 60 -keyint_min 60 \
+            -c:a aac -b:a 128k -ac 2 -ar 44100 -async 1 "formateado_mutiny.mp4"
+
+          # Purgamos el fideo pesado residual para dejar el disco rígido virtual en cero
+          rm -f "$TARGET"
+
+          # Le devolvemos su nombre original inmaculado
+          mv formateado_mutiny.mp4 "$TARGET"
+          
+          echo "✅ Video normalizado a ADN Mutiny. Peso pluma definitivo:"
+          du -sh "$TARGET"
+
+          echo "💾 FASE 3: Sobreescribiendo el archivo limpio adentro de la Release bunker_mutiny..."
+          # Sube el archivo pluma (400-800 MB). El flag --clobber reemplaza el pesado viejo de forma atómica.
+          gh release upload bunker_mutiny "$TARGET" --clobber
+
+          echo "🏁 [MUTINY TV] Relevo completado. El fideo quedó idéntico y a escuadra en el estante."
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
