@@ -60,8 +60,14 @@ jobs:
 
           echo "🪓 [MUTINY] DETECTANDO PRIMER TÍTULO DE MARATÓN..."
           PRIMERA_LINEA=$(head -n 1 grilla_cruda.txt)
+                  echo "🪓 [MUTINY] DETECTANDO PRIMER TÍTULO DE MARATÓN..."
+          PRIMERA_LINEA=$(head -n 1 grilla_cruda.txt)
           TITULO_INICIAL=$(echo "$PRIMERA_LINEA" | awk -F'|' '{print $2}' | sed 's/^[ \t]*//;s/[ \t]*$//')
-          echo "${TITULO_INICIAL:- sigueme en tiktok@streamdrome}" > letrero.txt
+          
+          # [REPARADO DEFINITIVO v710.5]: Si el Gist no tiene título, le clava strictly tu cuenta de TikTok.
+          # Envolverlo entre comillas dobles blinda el @streamdrome contra cualquier crash de Bash en la Actions.
+          echo "${TITULO_INICIAL:-sigueme en tiktok @streamdrome}" > letrero.txt
+
 
           echo "🪓 [MUTINY] COMPROBANDO LA CAÑERÍA LOCAL RE-DIRECCIONADA:"
           cat playlist_local.txt
