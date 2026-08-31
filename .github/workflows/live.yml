@@ -55,7 +55,7 @@ jobs:
             -r 30 -g 60 -keyint_min 60 -map 0:a:0? -map "[canvas_fusionado]" -sn -dn -pix_fmt yuv420p \
             -c:v libx264 -preset ultrafast -tune zerolatency -b:v 2500k -maxrate 2500k -bufsize 5000k \
             -c:a aac -b:a 128k -ac 2 -ar 44100 -af aresample=async=1 \
-            -f mpegts 'srt://fa723fc1b171.srt.live-video.net:9000?streamid=sk_us-west-2_yb6F1b18xTEE_QpaA7pm407C0FAAGgZPTqZHvtIJM2Q&passphrase=TNdOSyQpbrmfMc85yiQmEOTXpabTk4fDiu5tou4DGeJHknaCGXcuLjZgDUxzZi36DE1kqYR5ASxK0UR' || true
+            -f mpegts -mpegts_flags +initial_discontinuity+skip_unknown 'srt://fa723fc1b171.srt.live-video.net:9000?streamid=sk_us-west-2_yb6F1b18xTEE_QpaA7pm407C0FAAGgZPTqZHvtIJM2Q&passphrase=TNdOSyQpbrmfMc85yiQmEOTXpabTk4fDiu5tou4DGeJHknaCGXcuLjZgDUxzZi36DE1kqYR5ASxK0UR' || true
 
           echo "🏁 La transmisión en vivo ha finalizado. Satélite apagado."
         env:
