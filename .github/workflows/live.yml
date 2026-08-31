@@ -17,7 +17,7 @@ jobs:
 
       - name: 🚀 Emisión Directa Unificada hacia Kick vía SRT Síncrona Inmune
         run: |
-          # 🪓 [REACTOR CENTRAL INDUSTRIAL v715 - DIEGO FIXED LIVE SRT CORE]
+          # 🪓 [REACTOR CENTRAL INDUSTRIAL v715 - DIEGO FIXED LIVE HLS CORE]
           export TERM=xterm
           
           echo "Cargando..." > letrero.txt
@@ -29,34 +29,35 @@ jobs:
           # Lee el Gist de noticias una sola vez al principio
           curl -s "$URL_GIST_NOTICIAS" | head -n 1 | tr -d '\r\n' > abajo.txt
 
-          echo "📡 [MUTINY TV] SUCCIONANDO ENLACE IPTV EN VIVO..."
+          echo "📡 [MUTINY TV] SUCCIONANDO ENLACE LIVE DE INTERNET..."
           curl -L -s "$URL_GIST_PLAYLIST" | tr -d '\r' | sed '/^$/d' > grilla_cruda.txt
           
-          # Extraemos la primera línea del Gist (que ahora debe ser la URL del archivo .ts)
+          # Extraemos la URL de la lista del Gist
           PRIMERA_LINEA=$(head -n 1 grilla_cruda.txt)
-          URL_LIVE_TS=$(echo "$PRIMERA_LINEA" | awk -F'|' '{print $1}' | tr -d ' ')
+          URL_LIVE_STREAM=$(echo "$PRIMERA_LINEA" | awk -F'|' '{print $1}' | tr -d ' ')
           TITULO_INICIAL=$(echo "$PRIMERA_LINEA" | awk -F'|' '{print $2}' | sed 's/^[ \t]*//;s/[ \t]*$//')
           
-          echo "🔗 URL IPTV Detectada: $URL_LIVE_TS"
+          echo "🔗 URL IPTV Detectada: $URL_LIVE_STREAM"
           echo "${TITULO_INICIAL:-sigueme en tiktok @streamdrome}" > letrero.txt
 
-          echo "📡 [MUTINY TV] ENCIENDIENDO CAÑO MAESTRO DE EMISIÓN SRT EN VIVO DESDE FUENTE TS..."
+          echo "📡 [MUTINY TV] ENCIENDIENDO CAÑO MAESTRO DE EMISIÓN SRT RESILIENTE..."
           
-          # 🧠 [MODIFICACIÓN EN VIVO]:
-          # 1. Reemplazamos '-f concat -safe 0 -i playlist_local.txt' por '-headers' (para autenticar el User-Agent) e '-i "$URL_LIVE_TS"'.
-          # 2. El parámetro '-re' se mantiene para leer el stream de internet a velocidad nativa de emisión.
-          # 3. Agregamos '-fflags +nobuffer' para evitar retrasos acumulados en la RAM de la Actions al procesar IPTV en vivo.
+          # 🧠 [REPARADO DEFINITIVO]:
+          # 1. Agregamos '-fflags +nobuffer+nofix_dts' para corregir las líneas de tiempo alteradas de las listas IPTV/M3U8.
+          # 2. Corregimos el mpegts_flags usando '+initial_discontinuity', removiendo el valor inexistente que rompió el multiplexor.
           ffmpeg -y \
             -headers "User-Agent: VLC/3.0.18 LibVLC/3.0.18" \
-            -fflags +genpts+igndts+flush_packets+discardcorrupt+nofillin+nobuffer -re -async 1 \
-            -i "$URL_LIVE_TS" \
+            -fflags +genpts+igndts+flush_packets+discardcorrupt+nofillin+nobuffer+nofix_dts -re -async 1 \
+            -i "$URL_LIVE_STREAM" \
             -re -loop 1 -i plantilla_horizontal.png \
             -filter_complex "[0:v]scale=1280:720,crop=1270:710:5:5[peli_expandida]; [1:v]scale=1280:720[fondo_base]; [fondo_base][peli_expandida]overlay=0:0:shortest=1[canvas_parcial]; [canvas_parcial]drawtext=textfile=letrero.txt:reload=1:x=30:y=25:fontsize=24:fontcolor=0x00e676:fontfile=/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf:box=1:boxcolor=black@0.6:boxborderw=5,drawtext=textfile=abajo.txt:reload=1:x=30:y=665:fontsize=24:fontcolor=0x00e676:fontfile=/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf:box=1:boxcolor=black@0.5:boxborderw=4[canvas_fusionado]" \
             -r 30 -g 60 -keyint_min 60 -map 0:a:0? -map "[canvas_fusionado]" -sn -dn -pix_fmt yuv420p \
             -c:v libx264 -preset ultrafast -tune zerolatency -b:v 2500k -maxrate 2500k -bufsize 5000k \
             -c:a aac -b:a 128k -ac 2 -ar 44100 -af aresample=async=1 \
-            -f mpegts -mpegts_flags +initial_discontinuity+skip_unknown 'srt://fa723fc1b171.srt.live-video.net:9000?streamid=sk_us-west-2_yb6F1b18xTEE_QpaA7pm407C0FAAGgZPTqZHvtIJM2Q&passphrase=TNdOSyQpbrmfMc85yiQmEOTXpabTk4fDiu5tou4DGeJHknaCGXcuLjZgDUxzZi36DE1kqYR5ASxK0UR' || true
+            -f mpegts -mpegts_flags +initial_discontinuity 'srt://fa723fc1b171.srt.live-video.net:9000?streamid=sk_us-west-2_yb6F1b18xTEE_QpaA7pm407C0FAAGgZPTqZHvtIJM2Q&passphrase=TNdOSyQpbrmfMc85yiQmEOTXpabTk4fDiu5tou4DGeJHknaCGXcuLjZgDUxzZi36DE1kqYR5ASxK0UR' || true
 
           echo "🏁 La transmisión en vivo ha finalizado. Satélite apagado."
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+        
