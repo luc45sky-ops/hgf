@@ -14,7 +14,6 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y ffmpeg fonts-dejavu-core curl jq
-
       - name: 🚀 Emisión Directa Unificada hacia Kick vía SRT Síncrona Inmune
         run: |
           # 🪓 [REACTOR CENTRAL INDUSTRIAL v715 - DIEGO FIXED PURE LIVE CORE]
@@ -28,7 +27,6 @@ jobs:
          
           # Lee el Gist de noticias una sola vez al principio
           curl -s "$URL_GIST_NOTICIAS" | head -n 1 | tr -d '\r\n' > abajo.txt
-
           echo "📡 [MUTINY TV] SUCCIONANDO ENLACE LIVE DE INTERNET..."
           curl -L -s "$URL_GIST_PLAYLIST" | tr -d '\r' | sed '/^$/d' > grilla_cruda.txt
           
@@ -39,24 +37,23 @@ jobs:
           
           echo "🔗 URL IPTV Detectada: $URL_LIVE_STREAM"
           echo "${TITULO_INICIAL:-sigueme en tiktok @streamdrome}" > letrero.txt
-
           echo "📡 [MUTINY TV] ENCIENDIENDO CAÑO MAESTRO DE EMISIÓN SRT RESILIENTE..."
           
           # 🧠 [REPARADO DEFINITIVO AL RAS DEL METAL]:
           # 1. Volamos todos los flags de fflags (+genpts, +nobuffer, nofix_dts, etc.) que hacían explotar el compilador.
           # 2. Dejamos solo '-re' para leer el stream a velocidad nativa y '-async 1' para clavar el labio de los actores.
           # 3. Volamos las banderas mpegts_flags del final para evitar baches de multiplexor.
+          # 4. Inyectamos rotate=0.03:fillcolor=black en el canal de la peli para distorsionar la huella digital y evadir DMCA.
           ffmpeg -y \
             -headers "User-Agent: VLC/3.0.18 LibVLC/3.0.18" \
             -re -async 1 \
             -i "$URL_LIVE_STREAM" \
             -re -loop 1 -i plantilla_horizontal.png \
-            -filter_complex "[0:v]scale=1280:720,crop=1270:710:5:5[peli_expandida]; [1:v]scale=1280:720[fondo_base]; [fondo_base][peli_expandida]overlay=0:0:shortest=1[canvas_parcial]; [canvas_parcial]drawtext=textfile=letrero.txt:reload=1:x=30:y=25:fontsize=24:fontcolor=0x00e676:fontfile=/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf:box=1:boxcolor=black@0.6:boxborderw=5,drawtext=textfile=abajo.txt:reload=1:x=30:y=665:fontsize=24:fontcolor=0x00e676:fontfile=/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf:box=1:boxcolor=black@0.5:boxborderw=4[canvas_fusionado]" \
+            -filter_complex "[0:v]scale=1280:720,crop=1270:710:5:5,rotate=0.03:fillcolor=black[peli_expandida]; [1:v]scale=1280:720[fondo_base]; [fondo_base][peli_expandida]overlay=0:0:shortest=1[canvas_parcial]; [canvas_parcial]drawtext=textfile=letrero.txt:reload=1:x=30:y=25:fontsize=24:fontcolor=0x00e676:fontfile=/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf:box=1:boxcolor=black@0.6:boxborderw=5,drawtext=textfile=abajo.txt:reload=1:x=30:y=665:fontsize=24:fontcolor=0x00e676:fontfile=/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf:box=1:boxcolor=black@0.5:boxborderw=4[canvas_fusionado]" \
             -r 30 -g 60 -keyint_min 60 -map 0:a:0? -map "[canvas_fusionado]" -sn -dn -pix_fmt yuv420p \
             -c:v libx264 -preset ultrafast -tune zerolatency -b:v 2500k -maxrate 2500k -bufsize 5000k \
             -c:a aac -b:a 128k -ac 2 -ar 44100 -af aresample=async=1 \
             -f mpegts 'srt://fa723fc1b171.srt.live-video.net:9000?streamid=sk_us-west-2_yb6F1b18xTEE_QpaA7pm407C0FAAGgZPTqZHvtIJM2Q&passphrase=TNdOSyQpbrmfMc85yiQmEOTXpabTk4fDiu5tou4DGeJHknaCGXcuLjZgDUxzZi36DE1kqYR5ASxK0UR' || true
-
           echo "🏁 La transmisión en vivo ha finalizado. Satélite apagado."
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
