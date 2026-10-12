@@ -4,7 +4,7 @@ import os
 
 def correr_robot_chat():
     # 📡 INTERFAZ DE CONEXIÓN IRC ESTÁNDAR DE KICK (Servidor de Chat Puro)
-    HOST = "irc.chat.kick.com"
+    HOST = "irc.kick.com"
     PUERTO = 6667
     
     # Chupa el nombre de tu canal desde las variables ocultas de GitHub
