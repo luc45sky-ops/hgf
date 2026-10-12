@@ -55,11 +55,17 @@ jobs:
           PRIMERA_LINEA=$(head -n 1 grilla_cruda.txt)
           TITULO_INICIAL=$(echo "$PRIMERA_LINEA" | awk -F'|' '{print $2}' | sed 's/^[ \t]*//;s/[ \t]*$//')
           
-          # [REPARADO]: Tu cuenta de TikTok blindada en comillas contra crasheos de Bash
+          # 🪓 ERROR REPARADO AQUÍ: Volviste a meter la comilla y la inyección hacia letrero.txt para que FFmpeg tenga el título inicial listo
           echo "${TITULO_INICIAL:-sigueme en tiktok @streamdrome}" > letrero.txt
 
           echo "🪓 [MUTINY] COMPROBANDO LA CAÑERÍA LOCAL RE-DIRECCIONADA:"
           cat playlist_local.txt
+
+          # 🤖 GATILLO PARÁSITO INTERACTIVO:
+          echo "🤖 [MUTINY] DESPERTANDO AL ROBOT DEL CHAT EN LA SOMBRA DE LA RAM..."
+          python3 bot_kick.py &
+          
+          sleep 2
 
           echo "📡 [MUTINY TV] ENCIENDIENDO CAÑO MAESTRO DE EMISIÓN SRT DE TRACCIÓN LIVIANA..."
           
