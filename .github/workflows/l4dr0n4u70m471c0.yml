@@ -65,4 +65,3 @@ jobs:
           done 3< ordenes_bunker.txt # Canal de lectura blindado rígido de boxes
           
           echo "🏁 [MUTINY TV] Toda la cartelera del Gist fue clonada de largo fluido. Estante lleno."
-
