@@ -67,5 +67,4 @@ jobs:
           echo "🏁 [MUTINY TV] Toda la cartelera del Gist fue clonada de largo fluido. Estante lleno."
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
