@@ -26,7 +26,7 @@ jobs:
           echo "📡 [MUTINY TV] SUCCIONANDO ÓRDENES DE TRABAJO DESDE EL GIST..."
           
           # 1. Chupamos tu playlist unificada de descargas desde tu Gist privado
-          curl -s "https://gist.githubusercontent.com/jav45dev-ctrl/36a0241efb9e52e647e15a969eaa8459/raw/prueba_uni.txt" | tr -d '\r' | sed '/^$/d' > ordenes_bunker.txt
+          curl -s "https://gist.githubusercontent.com/luc45sky-ops/6702432997e21ae694117f82c0844ed6/raw/gistfile1.txt" | tr -d '\r' | sed '/^$/d' > ordenes_bunker.txt
           
           contador=1
           
