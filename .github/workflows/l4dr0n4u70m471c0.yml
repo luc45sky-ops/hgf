@@ -1,4 +1,4 @@
-name: 📡 Mutiny TV - Ladrón de Contenido Síncrono Automático v6.2
+name: nuevo
 
 on:
   workflow_dispatch: # Se prende con un único botón de PLAY manual en la web de GitHub
