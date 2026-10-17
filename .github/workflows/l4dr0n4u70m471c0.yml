@@ -1,6 +1,5 @@
       - name: 🚀 Extracción en Cadena Directa e Inmune a Bloqueos de Tamaño
-        run: |
-          export TERM=xterm
+        run: | export TERM=xterm
           echo "📡 [MUTINY TV] SUCCIONANDO ÓRDENES DE TRABAJO DESDE EL GIST..."
           
           curl -s "https://gist.githubusercontent.com/luc45sky-ops/6702432997e21ae694117f82c0844ed6/raw/gistfile1.txt" | tr -d '\r' | sed '/^$/d' > ordenes_bunker.txt
